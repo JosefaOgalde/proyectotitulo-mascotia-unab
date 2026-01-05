@@ -1,0 +1,2554 @@
+{% extends 'registro/base.html' %}
+{% load registro_extras %}
+
+{% block title %}Bitácora de salud animal - {{ mascota.nombre }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .toggle-switch {
+        width: 50px;
+        height: 24px;
+        appearance: none;
+        background-color: #ccc;
+        border-radius: 12px;
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    .toggle-switch:checked {
+        background-color: #3d9eb3;
+    }
+    .toggle-switch::before {
+        content: '';
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: white;
+        top: 2px;
+        left: 2px;
+        transition: left 0.3s;
+    }
+    .toggle-switch:checked::before {
+        left: 28px;
+    }
+    .section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-left: 0.5rem;
+        border-left: 4px solid;
+    }
+    .section-header.naranja { border-left-color: #ff9800; }
+    .section-header.rojo { border-left-color: #f44336; }
+    .section-header.morado { border-left-color: #9c27b0; }
+    .section-header.verde { border-left-color: #4caf50; }
+    .section-header.azul-claro { border-left-color: #03a9f4; }
+    .section-icon {
+        font-size: 1.5rem;
+        display: none;
+    }
+    .section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #000000;
+        margin: 0;
+    }
+    .resumen-card {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #e0e0e0;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .resumen-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    .resumen-item:last-child {
+        border-bottom: none;
+    }
+    .resumen-label {
+        font-weight: 600;
+        color: #666;
+    }
+    .resumen-value {
+        color: #000000;
+        font-weight: 500;
+    }
+    .evento-card {
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    .evento-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 1rem;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+    .badge-cita { background-color: #3d9eb3; color: #ffffff; }
+    .badge-medicacion { background-color: #3d9eb3; color: #ffffff; }
+    .badge-curacion { background-color: #3d9eb3; color: #ffffff; }
+    .badge-vacuna { background-color: #3d9eb3; color: #ffffff; }
+    .badge-desparasitacion { background-color: #3d9eb3; color: #ffffff; }
+    .badge-comentario { background-color: #e0e0e0; color: #000000; }
+    
+    /* Estilos para campos del formulario */
+    form input[type="text"],
+    form input[type="number"],
+    form input[type="date"],
+    form select,
+    form textarea {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        background-color: #ffffff;
+        color: #000000;
+    }
+    form input:focus,
+    form select:focus,
+    form textarea:focus {
+        outline: none;
+        border-color: #3d9eb3;
+        box-shadow: 0 0 0 2px rgba(61, 158, 179, 0.1);
+    }
+    form textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    @media (max-width: 1024px) {
+        .section-header h1 {
+            font-size: 2rem !important;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .section-header h1 {
+            font-size: 1.75rem !important;
+            line-height: 1.3 !important;
+        }
+        .resumen-card {
+            padding: 1.25rem;
+        }
+        .resumen-item {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .section-header {
+            flex-wrap: wrap;
+        }
+        form section > div[style*="grid-template-columns"] {
+            grid-template-columns: 1fr !important;
+        }
+        .section-title {
+            font-size: 1.1rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .section-header h1 {
+            font-size: 1.5rem !important;
+            line-height: 1.3 !important;
+        }
+        .section-icon {
+            font-size: 1.25rem;
+        }
+        .resumen-card {
+            padding: 1rem;
+        }
+        .section-title {
+            font-size: 1rem !important;
+        }
+    }
+    
+    /* Estilos del Footer */
+    .site-footer {
+        background-color: #f0f9fa;
+        padding: 48px 0 24px;
+        border-top: 1px solid #d0e8eb;
+        margin-top: 3rem;
+    }
+    
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 24px;
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1.2fr 1.6fr;
+        gap: 32px;
+        font-size: 13px;
+        color: #555555;
+    }
+    
+    .footer-title {
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #00a9b4;
+        font-size: 14px;
+    }
+    
+    .footer-brand-title {
+        font-weight: 800;
+        color: #00a9b4;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    
+    .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .footer-list li {
+        margin-bottom: 8px;
+    }
+    
+    .footer-list a {
+        color: #555555;
+        transition: color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .footer-list a:hover {
+        color: #00a9b4;
+    }
+    
+    .footer-contact-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: #555555;
+    }
+    
+    .footer-contact-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #00a9b4;
+        color: #ffffff;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .footer-contact-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .footer-bottom {
+        border-top: 1px solid #d0e8eb;
+        margin-top: 16px;
+        padding-top: 24px;
+    }
+    
+    .footer-bottom-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #666666;
+    }
+    
+    .footer-socials {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #00a9b4;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .social-icon:hover {
+        background-color: #008491;
+    }
+    
+    .social-icon.instagram {
+        background-color: #00a9b4;
+    }
+    
+    .social-icon.instagram:hover {
+        background-color: #008491;
+    }
+    
+    @media (max-width: 768px) {
+        .footer-inner {
+            grid-template-columns: 1fr 1fr;
+            row-gap: 32px;
+        }
+        
+        .footer-bottom-inner {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .footer-inner {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="background-color:#f5f5f5; min-height:100vh;">
+    <!-- Banner teal completo -->
+    <div style="background-color:#3d9eb3; padding:2rem 0;">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:2rem; position:relative;">
+            <!-- Lado izquierdo: Foto y texto -->
+            <div style="display:flex; align-items:center; gap:1.5rem;">
+                <!-- Foto circular de la mascota con formulario para cambiar -->
+                <form id="form-foto-mascota-bitacora" method="post" action="{% url 'actualizar_foto_mascota' mascota.id %}" enctype="multipart/form-data" style="margin:0; display:inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="next" value="{% url 'bitacora_mascota' mascota.id %}">
+                    <input type="file" id="input-foto-mascota-bitacora" name="foto" accept="image/*" style="display:none;" onchange="document.getElementById('form-foto-mascota-bitacora').submit();">
+                    {% if mascota.foto %}
+                        {% load static %}
+                        <div id="foto-mascota-container-bitacora" style="width:160px; height:160px; border-radius:50%; background-color:#ffffff; border:3px solid #ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer; position:relative; transition:all 0.2s;" onclick="document.getElementById('input-foto-mascota-bitacora').click();" onmouseover="document.getElementById('icono-editar-mascota-bitacora').style.opacity='1';" onmouseout="document.getElementById('icono-editar-mascota-bitacora').style.opacity='0';" title="Haz clic para cambiar la foto de la mascota">
+                            <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;">
+                            <div id="icono-editar-mascota-bitacora" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% else %}
+                        {% load static %}
+                        <div id="foto-mascota-container-bitacora" style="width:160px; height:160px; border-radius:50%; background-color:#ffffff; border:3px solid #ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer; position:relative; transition:all 0.2s;" onclick="document.getElementById('input-foto-mascota-bitacora').click();" onmouseover="document.getElementById('icono-editar-mascota-bitacora-vacio').style.opacity='1';" onmouseout="document.getElementById('icono-editar-mascota-bitacora-vacio').style.opacity='0';" title="Haz clic para agregar la foto de la mascota">
+                            {% if mascota.especie == 'perro' %}
+                                <img src="{% static 'registro/icons/perro.svg' %}" alt="Perro" style="width:80px; height:80px; object-fit:contain;">
+                            {% else %}
+                                <img src="{% static 'registro/icons/gato.svg' %}" alt="Gato" style="width:80px; height:80px; object-fit:contain;">
+                            {% endif %}
+                            <div id="icono-editar-mascota-bitacora-vacio" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+                <div>
+                    <h1 style="margin:0; font-size:1.5rem; font-weight:700; color:#ffffff; line-height:1.2;">Bitácora de salud animal - {{ mascota.nombre }}</h1>
+                    <p style="margin:0.5rem 0 0; font-size:0.95rem; color:#ffffff; opacity:0.95;">{{ mascota.get_especie_display }} • {% if mascota.raza %}{{ mascota.raza }}{% endif %} • {% if mascota.edad %}{{ mascota.edad }}{% endif %}</p>
+                    <p style="margin:0.5rem 0 0; font-size:0.9rem; font-weight:600; color:#ffffff; opacity:0.9;">{{ ficha.microchip|default:mascota.microchip|default:"M000001" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main style="padding:2rem 0; background-color:#f5f5f5;">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+
+        {% if ficha.tiene_datos and not mostrar_formulario %}
+        <!-- Botón de editar fuera del recuadro -->
+        <div style="display:flex; justify-content:flex-end; margin-bottom:1rem;">
+            <a href="?editar=1" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1rem; background-color:#3d9eb3; color:#ffffff; border:none; border-radius:0.35rem; font-weight:600; text-decoration:none; font-size:0.85rem; cursor:pointer; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#2d8ea3'" onmouseout="this.style.backgroundColor='#3d9eb3'">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/>
+                </svg>
+                <span>Editar</span>
+            </a>
+        </div>
+        <!-- Sección Información Básica - Modo Visualización -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <!-- Primera fila: Fecha de Nacimiento, Edad, Color de Pelaje, Alergias -->
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem; margin-bottom:1rem;">
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">FECHA DE NACIMIENTO</label>
+                    <p style="margin:0; font-size:0.95rem; color:#000; font-weight:500;">{% if mascota.fecha_nacimiento %}{{ mascota.fecha_nacimiento|date:"d/m/Y" }}{% else %}—{% endif %}</p>
+                </div>
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">EDAD</label>
+                    <p style="margin:0; font-size:0.95rem; color:#000; font-weight:500;">{% if mascota.edad %}{{ mascota.edad }}{% else %}—{% endif %}</p>
+                </div>
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">COLOR DE PELAJE</label>
+                    <p style="margin:0; font-size:0.95rem; color:#000; font-weight:500;">{% if mascota.color_pelaje %}{{ mascota.color_pelaje }}{% else %}—{% endif %}</p>
+                </div>
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem;">
+                    <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">ALERGIAS</label>
+                    <p style="margin:0; font-size:0.95rem; color:#000; font-weight:500;">{% if ficha.alergias and ficha.alergias.strip %}{{ ficha.alergias }}{% else %}No manifiesta{% endif %}</p>
+                </div>
+            </div>
+            
+            <!-- Segunda fila: Próxima Visita a Veterinaria, Última Vacuna -->
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem;">
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">PRÓXIMA VISITA A VETERINARIA</label>
+                        <p style="margin:0; font-size:0.95rem; color:#000; font-weight:500;">{% if proxima_visita %}{{ proxima_visita|date:"d/m/Y" }}{% else %}—{% endif %}</p>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#3d9eb3"/>
+                    </svg>
+                </div>
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem; display:flex; align-items:center; justify-content:space-between;">
+                    <div>
+                        <label style="display:block; font-size:0.75rem; font-weight:700; color:#666; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:0.05em;">ÚLTIMA VACUNA</label>
+                        <p style="margin:0; font-size:0.95rem; color:#000; font-weight:500;">{% if ultima_vacuna %}{{ ultima_vacuna.fecha_evento|date:"d/m/Y" }}{% elif vacunas_display == 'Sí' or vacunas_display == 'Al día' %}Al día{% else %}No hay información{% endif %}</p>
+                    </div>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#4caf50"/>
+                    </svg>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección Controles Veterinarios -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-color:#40e0d0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2v14H3v3c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3V2l-1.5 1.5zM19 19c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1zm0-3H6V5h13v11zm-3-8H9v2h7V8zm0-3H9v2h7V5z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Controles Veterinarios</h2>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#666; padding-left:3.25rem;">Consultas y tratamientos</p>
+                </div>
+                <button type="button" onclick="abrirModalControl();" style="background-color:#40e0d0; color:#ffffff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                    </svg>
+                    <span>Agregar Control</span>
+                </button>
+            </div>
+            
+            {% if eventos_controles %}
+            <div style="display:flex; flex-direction:column; gap:1rem;">
+                {% for control in eventos_controles %}
+                <div style="display:flex; align-items:start; gap:1rem; padding:1rem; background-color:#f5f5f5; border-left:4px solid #40e0d0; border-radius:0.5rem;">
+                    <div style="width:40px; height:40px; border-radius:50%; background-color:#b3f5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2v14H3v3c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3V2l-1.5 1.5zM19 19c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1zm0-3H6V5h13v11zm-3-8H9v2h7V8zm0-3H9v2h7V5z" fill="#40e0d0"/>
+                        </svg>
+                    </div>
+                    <div style="flex:1;">
+                        <h3 style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:700; color:#000000;">{{ control.tipo|default:"Control veterinario" }}</h3>
+                        <div style="display:flex; flex-direction:column; gap:0.25rem; font-size:0.9rem; color:#666;">
+                            {% if control.veterinario %}
+                            <div>{{ control.veterinario }}</div>
+                            {% endif %}
+                            {% if control.descripcion %}
+                            <div>{{ control.descripcion }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div style="text-align:right; color:#000000; font-weight:600; font-size:0.9rem;">
+                        {{ control.fecha|date:"d/m/Y" }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:2rem; color:#666; font-size:0.9rem;">
+                No hay controles veterinarios registrados. Haz clic en "Agregar Control" para registrar el primero.
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sección Registro de Vacunas -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-color:#3d9eb3; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.36 2.64C19.36 2.64 18.39 2 17.5 2c-.89 0-1.86.64-1.86.64S14.5 2.5 13.5 2.5c-1 0-2.14.64-2.14.64S10.22 2 9.5 2C8.61 2 7.64 2.64 7.64 2.64L6.5 4.5c-.5.5-.5 1.32 0 1.82L8 7.82v8.36L6.5 17.68c-.5.5-.5 1.32 0 1.82l1.14 1.86s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64s1.14.64 2.14.64c1 0 2.14-.64 2.14-.64s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64L19.5 19.5c.5-.5.5-1.32 0-1.82L18 15.18V7.82l1.5-1.5c.5-.5.5-1.32 0-1.82L19.36 2.64zM16 16H8V8h8v8z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Registro de Vacunas</h2>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#666; padding-left:3.25rem;">Historial y próximas vacunas</p>
+                </div>
+                <button type="button" onclick="abrirModalVacuna();" style="background-color:#3d9eb3; color:#ffffff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                    </svg>
+                    <span>Agregar Vacuna</span>
+                </button>
+            </div>
+            
+            {% if eventos_vacunas %}
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+                {% for vacuna in eventos_vacunas %}
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem; position:relative;">
+                    {% if vacuna.es_proxima %}
+                    <span style="position:absolute; top:0.75rem; right:0.75rem; background-color:#3d9eb3; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.75rem; font-weight:600;">Próxima</span>
+                    {% else %}
+                    <span style="position:absolute; top:0.75rem; right:0.75rem; background-color:#9e9e9e; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.75rem; font-weight:600;">Aplicada</span>
+                    {% endif %}
+                    <h3 style="margin:0 0 1rem 0; font-size:1rem; font-weight:700; color:#000000; padding-right:4rem;">{{ vacuna.nombre|default:"Vacuna" }}</h3>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:#000000;">
+                        <div>
+                            <strong>Aplicada:</strong> 
+                            <span>{{ vacuna.fecha_aplicada|date:"d/m/Y" }}</span>
+                        </div>
+                        {% if vacuna.proxima_fecha %}
+                        <div>
+                            <strong>Próxima:</strong> 
+                            <span>{{ vacuna.proxima_fecha|date:"d/m/Y" }}</span>
+                        </div>
+                        {% endif %}
+                        {% if vacuna.veterinario %}
+                        <div>
+                            <strong>Veterinario:</strong> 
+                            <span>{{ vacuna.veterinario }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:2rem; color:#666; font-size:0.9rem;">
+                No hay vacunas registradas. Haz clic en "Agregar Vacuna" para registrar la primera.
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sección Visitas a la Peluquería -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-color:#9c27b0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.5 5.5L18.5 3.5l-2 2 2 2 2-2zm-4 0L14.5 3.5l-2 2 2 2 2-2zm-4 0L10.5 3.5l-2 2 2 2 2-2zM6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H6zm0 2h12v16H6V4z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Visitas a la Peluquería</h2>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#666; padding-left:3.25rem;">Historial de baños y cortes</p>
+                </div>
+                <button type="button" onclick="abrirModalPeluqueria();" style="background-color:#9c27b0; color:#ffffff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                    </svg>
+                    <span>Agregar Visita</span>
+                </button>
+            </div>
+            
+            {% if eventos_peluqueria %}
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+                {% for visita in eventos_peluqueria %}
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:start; gap:0.75rem; margin-bottom:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#e1bee7; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.5 5.5L18.5 3.5l-2 2 2 2 2-2zm-4 0L14.5 3.5l-2 2 2 2 2-2zm-4 0L10.5 3.5l-2 2 2 2 2-2zM6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H6zm0 2h12v16H6V4z" fill="#9c27b0"/>
+                            </svg>
+                        </div>
+                        <div style="flex:1;">
+                            <h3 style="margin:0 0 0.25rem 0; font-size:1rem; font-weight:700; color:#000000;">{{ visita.tipo_servicio|default:"Visita" }}</h3>
+                            <p style="margin:0; font-size:0.85rem; color:#666;">{{ visita.fecha|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:#000000;">
+                        {% if visita.establecimiento %}
+                        <div>
+                            <strong>Establecimiento:</strong> 
+                            <span>{{ visita.establecimiento }}</span>
+                        </div>
+                        {% endif %}
+                        {% if visita.servicios %}
+                        <div>
+                            <strong>Servicios:</strong> 
+                            <span>{{ visita.servicios }}</span>
+                        </div>
+                        {% endif %}
+                        {% if visita.proxima_visita %}
+                        <div>
+                            <strong>Próxima visita:</strong> 
+                            <span>{{ visita.proxima_visita|date:"d/m/Y" }}</span>
+                        </div>
+                        {% elif visita.completada %}
+                        <div>
+                            <strong>Próxima visita:</strong> 
+                            <span style="color:#666;">Completada</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:2rem; color:#666; font-size:0.9rem;">
+                No hay visitas a la peluquería registradas. Haz clic en "Agregar Visita" para registrar la primera.
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sección Desparasitaciones -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-color:#ff9800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Desparasitación</h2>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#666; padding-left:3.25rem;">Control de parásitos internos y externos</p>
+                </div>
+                <button type="button" onclick="abrirModalDesparasitacion();" style="background-color:#ff9800; color:#ffffff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                    </svg>
+                    <span>Agregar Registro</span>
+                </button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem;">
+                <!-- Desparasitación Interna -->
+                <div style="background-color:#fff3e0; border:1px solid #ffcc80; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div style="width:24px; height:24px; border-radius:50%; background-color:#ff9800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:#000000;">Desparasitación Interna</h3>
+                    </div>
+                    <p style="margin:0 0 0.75rem 0; font-size:0.8rem; color:#666;">Última aplicación</p>
+                    {% if desparasitacion_interna %}
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:#000000;">
+                        <div><strong>Producto:</strong> {{ desparasitacion_interna.producto }}</div>
+                        <div><strong>Fecha:</strong> {{ desparasitacion_interna.fecha|date:"d/m/Y" }}</div>
+                        {% if desparasitacion_interna.proxima_dosis %}
+                        <div><strong>Próxima dosis:</strong> {{ desparasitacion_interna.proxima_dosis|date:"d/m/Y" }}</div>
+                        {% endif %}
+                        {% if desparasitacion_interna.frecuencia %}
+                        <div><strong>Frecuencia:</strong> {{ desparasitacion_interna.frecuencia }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p style="margin:0; font-size:0.85rem; color:#666;">No hay registros</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Desparasitación Externa -->
+                <div style="background-color:#e8f5e9; border:1px solid #a5d6a7; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div style="width:24px; height:24px; border-radius:50%; background-color:#4caf50; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h3 style="margin:0; font-size:0.95rem; font-weight:700; color:#000000;">Desparasitación Externa</h3>
+                    </div>
+                    <p style="margin:0 0 0.75rem 0; font-size:0.8rem; color:#666;">Última aplicación</p>
+                    {% if desparasitacion_externa %}
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:#000000;">
+                        <div><strong>Producto:</strong> {{ desparasitacion_externa.producto }}</div>
+                        <div><strong>Fecha:</strong> {{ desparasitacion_externa.fecha|date:"d/m/Y" }}</div>
+                        {% if desparasitacion_externa.proxima_dosis %}
+                        <div><strong>Próxima dosis:</strong> {{ desparasitacion_externa.proxima_dosis|date:"d/m/Y" }}</div>
+                        {% endif %}
+                        {% if desparasitacion_externa.frecuencia %}
+                        <div><strong>Frecuencia:</strong> {{ desparasitacion_externa.frecuencia }}</div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    <p style="margin:0; font-size:0.85rem; color:#666;">No hay registros</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sección Medicamentos Actuales -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-color:#2196f3; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.36 2.64C19.36 2.64 18.39 2 17.5 2c-.89 0-1.86.64-1.86.64S14.5 2.5 13.5 2.5c-1 0-2.14.64-2.14.64S10.22 2 9.5 2C8.61 2 7.64 2.64 7.64 2.64L6.5 4.5c-.5.5-.5 1.32 0 1.82L8 7.82v8.36L6.5 17.68c-.5.5-.5 1.32 0 1.82l1.14 1.86s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64s1.14.64 2.14.64c1 0 2.14-.64 2.14-.64s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64L19.5 19.5c.5-.5.5-1.32 0-1.82L18 15.18V7.82l1.5-1.5c.5-.5.5-1.32 0-1.82L19.36 2.64zM16 16H8V8h8v8z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Medicamentos Actuales</h2>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#666; padding-left:3.25rem;">Tratamientos en curso</p>
+                </div>
+                <button type="button" onclick="abrirModalMedicamento();" style="background-color:#2196f3; color:#ffffff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                    </svg>
+                    <span>Agregar Medicamento</span>
+                </button>
+            </div>
+            
+            {% if medicamentos_actuales %}
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+                {% for medicamento in medicamentos_actuales %}
+                <div style="background-color:#e3f2fd; border:1px solid #90caf9; border-radius:0.5rem; padding:1rem; position:relative;">
+                    {% if medicamento.activo %}
+                    <span style="position:absolute; top:0.75rem; right:0.75rem; background-color:#2196f3; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.75rem; font-weight:600;">Activo</span>
+                    {% endif %}
+                    <h3 style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:700; color:#000000; padding-right:4rem;">{{ medicamento.nombre }}</h3>
+                    {% if medicamento.indicacion %}
+                    <p style="margin:0 0 0.75rem 0; font-size:0.85rem; color:#666;">{{ medicamento.indicacion }}</p>
+                    {% endif %}
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:#000000;">
+                        <div><strong>Dosis:</strong> {{ medicamento.dosis }}</div>
+                        <div><strong>Frecuencia:</strong> {{ medicamento.frecuencia }}</div>
+                        <div><strong>Inicio:</strong> {{ medicamento.inicio|date:"d/m/Y" }}</div>
+                        {% if medicamento.fin %}
+                        <div><strong>Fin:</strong> {{ medicamento.fin|date:"d/m/Y" }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:2rem; color:#666; font-size:0.9rem;">
+                No hay medicamentos registrados. Haz clic en "Agregar Medicamento" para registrar el primero.
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sección Alimentación -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:0.5rem;">
+                        <div style="width:40px; height:40px; border-radius:50%; background-color:#40e0d0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Alimentación</h2>
+                    </div>
+                    <p style="margin:0; font-size:0.85rem; color:#666; padding-left:3.25rem;">Registro de dieta y alimentación</p>
+                </div>
+                <button type="button" onclick="abrirModalAlimentacion();" style="background-color:#40e0d0; color:#ffffff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                    </svg>
+                    <span>Agregar Registro</span>
+                </button>
+            </div>
+            
+            {% if registros_alimentacion %}
+            <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:1rem;">
+                {% for registro in registros_alimentacion %}
+                <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.5rem; padding:1rem;">
+                    <h3 style="margin:0 0 0.75rem 0; font-size:1rem; font-weight:700; color:#000000;">{{ registro.tipo|default:"Registro de alimentación" }}</h3>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.9rem; color:#000000;">
+                        {% if registro.descripcion %}
+                        <div>{{ registro.descripcion }}</div>
+                        {% endif %}
+                        <div><strong>Fecha:</strong> {{ registro.fecha|date:"d/m/Y" }}</div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align:center; padding:2rem; color:#666; font-size:0.9rem;">
+                No hay registros de alimentación. Haz clic en "Agregar Registro" para registrar el primero.
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Sección Archivos adjuntos -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#666666"/>
+                </svg>
+                <h2 style="margin:0; font-size:1.1rem; font-weight:700; color:#3d9eb3;">Archivos adjuntados{% if todos_los_archivos %} ({{ todos_los_archivos|length }}){% endif %}</h2>
+            </div>
+            
+            <!-- Formulario para subir archivos -->
+            <form method="post" enctype="multipart/form-data" id="form-archivos-ficha">
+                {% csrf_token %}
+                <input type="hidden" name="subir_archivo_ficha" value="1" />
+                <div style="border:2px dashed #d0d0d0; border-radius:0.5rem; padding:2.5rem; text-align:center; background-color:#ffffff; margin-bottom:1rem;">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin:0 auto 1rem;">
+                        <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" fill="#d0d0d0"/>
+                    </svg>
+                    <div style="margin-bottom:0.75rem;">
+                        <label for="archivos_ficha" style="color:#3d9eb3; font-weight:700; cursor:pointer; text-decoration:underline; font-size:0.9rem;">Elegir archivos</label>
+                        <span style="color:#999; font-size:0.85rem;"> | </span>
+                        <span id="archivos-seleccionados" style="color:#999; font-size:0.85rem;">Ningún archivo seleccionado</span>
+                        <input type="file" id="archivos_ficha" name="archivos_ficha" multiple accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.doc,.docx,.txt" style="display:none;" onchange="updateFileLabelAndSubmit(this)">
+                    </div>
+                    <p style="margin:1rem 0 0; font-size:0.8rem; color:#999; display:flex; align-items:center; justify-content:center; gap:0.5rem; flex-wrap:wrap;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#ffc107"/>
+                        </svg>
+                        <span>Puedes adjuntar imágenes (JPG, PNG, GIF, WEBP) o documentos (PDF, DOC, DOCX, TXT). Máximo 10MB por archivo. Puedes seleccionar múltiples archivos.</span>
+                    </p>
+                </div>
+            </form>
+            
+            <!-- Lista de archivos adjuntos -->
+            <div id="archivos-list" style="margin-top:1.5rem;">
+                {% if todos_los_archivos %}
+                    {% for item in todos_los_archivos %}
+                    {% with archivo=item.archivo evento=item.evento %}
+                    <div style="padding:0.75rem 1rem; border:1px solid #e0e0e0; border-radius:0.5rem; margin-bottom:0.5rem; display:flex; align-items:center; justify-content:space-between; background-color:#f5f5f5;">
+                        <div style="display:flex; align-items:center; gap:0.75rem; flex:1;">
+                            <!-- Icono de documento en celeste -->
+                            <div style="width:40px; height:40px; border-radius:0.5rem; background-color:#3d9eb3; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                            <div style="flex:1;">
+                                <a href="{{ archivo.archivo.url }}" target="_blank" style="color:#000000; text-decoration:none; font-weight:700; font-size:0.95rem; display:block; margin-bottom:0.25rem;">{{ archivo.nombre }}</a>
+                                <p style="margin:0; font-size:0.85rem; color:#666;">{{ archivo.obtener_tamano_display }} • {{ evento.fecha_evento|date:"d-m-Y" }}</p>
+                            </div>
+                        </div>
+                        <!-- Botón X para eliminar -->
+                        <button type="button" onclick="eliminarArchivo({{ archivo.id }})" style="background:none; border:none; color:#f44336; font-size:1.25rem; font-weight:700; cursor:pointer; padding:0.25rem 0.5rem; margin-left:0.5rem; flex-shrink:0;" title="Eliminar archivo">×</button>
+                    </div>
+                    {% endwith %}
+                    {% endfor %}
+                {% else %}
+                <p style="text-align:center; color:#666; padding:2rem;">No hay archivos adjuntos</p>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Sección Agregar evento a la bitácora -->
+        <div style="background-color:#ffffff; border-radius:0.75rem; padding:2rem; margin-bottom:2rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h2 style="font-size:1.25rem; font-weight:700; color:#3d9eb3; margin:0 0 1.5rem;">Agregar evento a la bitácora</h2>
+            <form method="post" enctype="multipart/form-data" id="form-evento-bitacora">
+                {% csrf_token %}
+                <input type="hidden" name="guardar_evento_home" value="1" />
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+                    <div>
+                        <label for="mascota_id_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Mascota</label>
+                        <select name="mascota_id" id="mascota_id_bitacora" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+                            <option value="">Selecciona</option>
+                            {% for mascota_item in todas_las_mascotas %}
+                            <option value="{{ mascota_item.id }}" {% if mascota_item.id == mascota.id %}selected{% endif %}>{{ mascota_item.nombre }} ({{ mascota_item.get_especie_display }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="position:relative;">
+                        <label for="id_fecha_evento_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha Evento</label>
+                        <input type="date" name="fecha_evento" id="id_fecha_evento_bitacora" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; padding-right:2.5rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute; right:0.75rem; top:2.5rem; pointer-events:none;">
+                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#666666"/>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+                    <div style="position:relative;">
+                        <label for="{{ evento_form.hora_evento.id_for_label }}_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Hora</label>
+                        <input type="time" name="{{ evento_form.hora_evento.name }}" id="{{ evento_form.hora_evento.id_for_label }}_bitacora" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; padding-right:2.5rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute; right:0.75rem; top:2.5rem; pointer-events:none;">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#666666"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <label for="{{ evento_form.tipo_evento.id_for_label }}_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Tipo de Evento</label>
+                        <select name="{{ evento_form.tipo_evento.name }}" id="{{ evento_form.tipo_evento.id_for_label }}_bitacora" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+                            <option value="">Selecciona</option>
+                            {% for choice in evento_form.tipo_evento.field.choices %}
+                            {% if choice.0 %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom:1.5rem;">
+                    <label for="{{ evento_form.veterinario.id_for_label }}_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Veterinario</label>
+                    <input type="text" name="{{ evento_form.veterinario.name }}" id="{{ evento_form.veterinario.id_for_label }}_bitacora" value="{{ evento_form.veterinario.value|default:'' }}" placeholder="Nombre del veterinario" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+                </div>
+                
+                <div style="margin-bottom:1.5rem;">
+                    <label for="{{ evento_form.descripcion.id_for_label }}_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Descripción</label>
+                    <textarea name="{{ evento_form.descripcion.name }}" id="{{ evento_form.descripcion.id_for_label }}_bitacora" rows="4" placeholder="Descripción del evento, observaciones..." style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; resize:vertical; font-family:inherit;">{{ evento_form.descripcion.value|default:'' }}</textarea>
+                </div>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem; margin-bottom:1.5rem;">
+                    <div>
+                        <label for="{{ evento_form.medicacion.id_for_label }}_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Medicación</label>
+                        <textarea name="{{ evento_form.medicacion.name }}" id="{{ evento_form.medicacion.id_for_label }}_bitacora" rows="4" placeholder="Medicamentos, dosis, frecuencia... (opcional)" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; resize:vertical; font-family:inherit;">{{ evento_form.medicacion.value|default:'' }}</textarea>
+                    </div>
+                    <div>
+                        <label for="{{ evento_form.consideraciones.id_for_label }}_bitacora" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Consideraciones</label>
+                        <textarea name="{{ evento_form.consideraciones.name }}" id="{{ evento_form.consideraciones.id_for_label }}_bitacora" rows="4" placeholder="Consideraciones especiales, observaciones, recomendaciones... (opcional)" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; resize:vertical; font-family:inherit;">{{ evento_form.consideraciones.value|default:'' }}</textarea>
+                    </div>
+                </div>
+                
+                <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2rem;">
+                    <button type="button" onclick="document.getElementById('form-evento-bitacora').reset();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                        Cancelar
+                    </button>
+                    <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                        Agregar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        {# Historial listado eliminado para que solo se vea el bloque de Registros y el formulario #}
+
+        {% if mostrar_formulario %}
+        <form method="post" enctype="multipart/form-data" style="background-color:#ffffff; border-radius:1.5rem; padding:2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom:2rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_ficha" value="1" />
+
+            <div style="display:grid; gap:2rem;">
+                <section>
+                    <div class="section-header naranja">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Información Básica</h2>
+                    </div>
+                    
+                    <!-- Campo para subir foto de la mascota -->
+                    <div style="margin-bottom:1.5rem; padding:1rem; border:2px dashed #3d9eb3; border-radius:0.5rem; background-color:#f0f9fa;">
+                        <label style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Foto de la Mascota</label>
+                        {% if mascota.foto %}
+                        <div style="margin-bottom:0.75rem;">
+                            <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" style="width:120px; height:120px; border-radius:50%; object-fit:cover; border:3px solid #3d9eb3; display:block;">
+                        </div>
+                        {% endif %}
+                        <input type="file" name="foto_mascota" id="foto_mascota" accept="image/*" style="width:100%; padding:0.5rem; border:1px solid #3d9eb3; border-radius:0.5rem; font-size:0.85rem;">
+                        <p style="margin:0.5rem 0 0; font-size:0.75rem; color:#666;">Sube una foto de tu mascota. Se mostrará en todas las visualizaciones.</p>
+                    </div>
+                    
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                        <div>
+                            <label style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">ID FichaClínica (PK)</label>
+                            <input type="text" value="{% if ficha.id %}{{ ficha.id }}{% else %}Auto-generado{% endif %}" disabled style="background-color:#f5f5f5; border:1px solid #ddd; border-radius:0.5rem; padding:0.75rem; width:100%; color:#666;">
+                        </div>
+                        <div>
+                            <label for="{{ ficha_form.microchip.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">ID Mascota</label>
+                            {{ ficha_form.microchip }}
+                            {% if ficha_form.microchip.errors %}
+                                <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.microchip.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% if not es_nuevo_registro or not ficha.historial_registros.exists %}
+                        <div>
+                            <label style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha de Nacimiento</label>
+                            <input type="date" value="{{ mascota.fecha_nacimiento|date:'Y-m-d' }}" disabled style="background-color:#f5f5f5; border:1px solid #ddd; border-radius:0.5rem; padding:0.75rem; width:100%; color:#666;">
+                        </div>
+                        {% endif %}
+                        {% if not tipo_sangre_oculto %}
+                        <div>
+                            <label for="{{ ficha_form.tipo_sangre.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Tipo de Sangre</label>
+                            {{ ficha_form.tipo_sangre }}
+                            {% if ficha_form.tipo_sangre.errors %}
+                                <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.tipo_sangre.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ ficha_form.tipo_sangre }}
+                        {% endif %}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header naranja">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Signos Vitales</h2>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:1.5rem;">
+                        <div>
+                            <label for="{{ ficha_form.peso.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Peso (kg)</label>
+                            {{ ficha_form.peso }}
+                            {% if ficha_form.peso.help_text %}
+                                <p style="font-size:0.8rem; color:#666; margin-top:0.25rem;">{{ ficha_form.peso.help_text }}</p>
+                            {% endif %}
+                            {% if ficha_form.peso.errors %}
+                                <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.peso.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                            <label for="{{ ficha_form.temperatura.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Temperatura (°C)</label>
+                            {{ ficha_form.temperatura }}
+                            {% if ficha_form.temperatura.help_text %}
+                                <p style="font-size:0.8rem; color:#666; margin-top:0.25rem;">{{ ficha_form.temperatura.help_text }}</p>
+                            {% endif %}
+                            {% if ficha_form.temperatura.errors %}
+                                <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.temperatura.errors.0 }}</p>
+                            {% endif %}
+                            <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.5rem;">
+                                {{ ficha_form.no_tengo_temperatura }}
+                                <label for="{{ ficha_form.no_tengo_temperatura.id_for_label }}" style="font-size:0.85rem; color:#666; cursor:pointer;">No tengo esta información</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header rojo">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Estado Clínico</h2>
+                    </div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                        {% if not esterilizado_oculto %}
+                        <div>
+                            <label for="{{ ficha_form.esterilizado.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Esterilizado</label>
+                            {{ ficha_form.esterilizado }}
+                            {% if ficha_form.esterilizado.errors %}
+                                <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.esterilizado.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        {{ ficha_form.esterilizado }}
+                        {% endif %}
+                        <div>
+                            <label for="{{ ficha_form.vacunas_estado.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Vacunas</label>
+                            {{ ficha_form.vacunas_estado }}
+                            {% if ficha_form.vacunas_estado.errors %}
+                                <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.vacunas_estado.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="ultima-vacuna-fields" style="display:none; margin-top:1.5rem;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:1.5rem;">
+                            <div id="vacuna-otra-texto-field" style="display:none;">
+                                <label for="{{ ficha_form.vacuna_otra_texto.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Especificar otra vacuna</label>
+                                {{ ficha_form.vacuna_otra_texto }}
+                                {% if ficha_form.vacuna_otra_texto.errors %}
+                                    <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.vacuna_otra_texto.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                            <div>
+                                <label for="{{ ficha_form.ultima_vacuna_fecha.id_for_label }}" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha de la Última Vacuna</label>
+                                {{ ficha_form.ultima_vacuna_fecha }}
+                                {% if ficha_form.ultima_vacuna_fecha.help_text %}
+                                    <p style="font-size:0.8rem; color:#666; margin-top:0.25rem;">{{ ficha_form.ultima_vacuna_fecha.help_text }}</p>
+                                {% endif %}
+                                {% if ficha_form.ultima_vacuna_fecha.errors %}
+                                    <p style="color:#ed99c5; font-size:0.8rem; margin-top:0.25rem;">{{ ficha_form.ultima_vacuna_fecha.errors.0 }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header naranja">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Alergias</h2>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:0.75rem; font-style:italic;">Describe las alergias conocidas de tu mascota. Escribe "No tengo información" o "N/A" si no conoces esta información.</p>
+                    <div style="background-color:#ffffff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.75rem;">
+                        {{ ficha_form.alergias }}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header morado">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Condiciones Crónicas</h2>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:0.75rem; font-style:italic;">Ej: Diabetes, carditis, problemas cardiacos. Escribe "No tengo información" o "N/A" si no conoces esta información.</p>
+                    <div style="background-color:#ffffff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.75rem;">
+                        {{ ficha_form.condiciones_cronicas }}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header rojo">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Tratamiento</h2>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:0.5rem; font-weight:600;">Medicamentos Actuales</p>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:0.75rem; font-style:italic;">Ingrese medicamentos, dosis y frecuencias. Escribe "No tengo información" o "N/A" si no conoces esta información.</p>
+                    <div style="background-color:#ffffff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.75rem;">
+                        {{ ficha_form.medicamentos_actuales }}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header verde">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Historial de Enfermedades</h2>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:0.75rem; font-style:italic;">Indicador de enfermedades pasadas y tratamientos. Escribe "No tengo información" o "N/A" si no conoces esta información.</p>
+                    <div style="background-color:#ffffff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.75rem;">
+                        {{ ficha_form.historial_enfermedades }}
+                    </div>
+                </section>
+
+                <section>
+                    <div class="section-header azul-claro">
+                        <h2 class="section-title" style="font-size:1.1rem; font-weight:700;">Comentarios Adicionales</h2>
+                    </div>
+                    <p style="font-size:0.85rem; color:#666; margin-bottom:0.75rem; font-style:italic;">Observaciones generales sobre la salud de tu mascota.</p>
+                    <div style="background-color:#ffffff; border:1px solid #e0e0e0; border-radius:0.5rem; padding:0.75rem;">
+                        {{ ficha_form.comentarios }}
+                    </div>
+                </section>
+            </div>
+
+            {% if ficha_form.non_field_errors %}
+                <div style="margin-top:1.5rem; padding:1rem; background-color:#f5f5f5; border:1px solid #666; border-radius:0.5rem;">
+                    <p style="color:#666; margin:0;">{{ ficha_form.non_field_errors }}</p>
+                </div>
+            {% endif %}
+
+            <div style="display:flex; justify-content:flex-end; gap:1rem; margin-top:2.5rem; padding-top:2rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="document.querySelector('form').reset();" style="background-color:#e0e0e0; color:#333333; border:1px solid #e0e0e0; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" fill="#333333"/>
+                    </svg>
+                    <span>Limpiar</span>
+                </button>
+                <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.75rem 2rem; border-radius:0.5rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z" fill="#ffffff"/>
+                    </svg>
+                    <span>Guardar Bitácora</span>
+                </button>
+            </div>
+        </form>
+        {% endif %}
+
+        <!-- Historial Clínico con Filtros -->
+        <section style="background:#fff; border:2px solid #a8e3e1; border-radius:0.75rem; padding:1.5rem; margin-bottom:2rem;">
+            <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem; color:#1aa3b0; font-weight:800;">
+                <span>📋</span>
+                <span style="font-size:1.2rem;">Historial Clínico</span>
+            </div>
+            
+            <!-- Filtros -->
+            <form method="get" style="background:#f7fafb; border:1px solid #e3eef0; border-radius:0.5rem; padding:1rem; margin-bottom:1rem;">
+                <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:1rem; align-items:end;">
+                    <div>
+                        <label for="fecha_desde" style="display:block; margin-bottom:0.25rem; font-weight:700; color:#000; font-size:0.85rem;">Fecha desde:</label>
+                        <input type="date" id="fecha_desde" name="fecha_desde" value="{{ filtro_fecha_desde }}" style="width:100%; padding:0.5rem; border:1px solid #e3eef0; border-radius:0.5rem; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label for="fecha_hasta" style="display:block; margin-bottom:0.25rem; font-weight:700; color:#000; font-size:0.85rem;">Fecha hasta:</label>
+                        <input type="date" id="fecha_hasta" name="fecha_hasta" value="{{ filtro_fecha_hasta }}" style="width:100%; padding:0.5rem; border:1px solid #e3eef0; border-radius:0.5rem; font-size:0.9rem;">
+                    </div>
+                    <div>
+                        <label for="tipo_evento" style="display:block; margin-bottom:0.25rem; font-weight:700; color:#000; font-size:0.85rem;">Tipo de evento:</label>
+                        <select id="tipo_evento" name="tipo_evento" style="width:100%; padding:0.5rem; border:1px solid #e3eef0; border-radius:0.5rem; font-size:0.9rem;">
+                            <option value="">Todos los tipos</option>
+                            {% for value, label in tipos_evento_choices %}
+                                <option value="{{ value }}" {% if filtro_tipo_evento == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div style="display:flex; gap:0.5rem;">
+                        <button type="submit" style="flex:1; background:#3d9eb3; color:#fff; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; cursor:pointer; font-size:0.9rem;">
+                            Filtrar
+                        </button>
+                        <a href="{% url 'bitacora_mascota' mascota.id %}" style="display:inline-flex; align-items:center; justify-content:center; background:#e0e0e0; color:#000; border:none; border-radius:0.5rem; padding:0.5rem 1rem; font-weight:700; text-decoration:none; font-size:0.9rem;">
+                            Limpiar
+                        </a>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Lista de eventos -->
+            {% if eventos_con_archivos %}
+                {% for item in eventos_con_archivos %}
+                    {% with evento=item.evento archivos=item.archivos %}
+                    <div class="evento-card" style="margin-bottom:1rem;">
+                        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+                            <div>
+                                <span class="evento-badge badge-{{ evento.tipo_evento }}">{{ evento.get_tipo_evento_display }}</span>
+                                <div style="font-weight:700; color:#000; margin-top:0.25rem;">{{ evento.fecha_evento|date:"d/m/Y" }}</div>
+                            </div>
+                            {% if evento.veterinario %}
+                                <div style="color:#666; font-size:0.9rem;">👨‍⚕️ {{ evento.veterinario }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if evento.descripcion %}
+                            <div style="margin-bottom:0.5rem; color:#000;">
+                                <strong>Descripción:</strong> {{ evento.descripcion }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if evento.diagnostico %}
+                            <div style="margin-bottom:0.5rem; color:#000;">
+                                <strong>Diagnóstico:</strong> {{ evento.diagnostico }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if evento.medicacion %}
+                            <div style="margin-bottom:0.5rem; color:#000;">
+                                <strong>Medicación:</strong> {{ evento.medicacion }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if evento.consideraciones %}
+                            <div style="margin-bottom:0.5rem; color:#000;">
+                                <strong>Consideraciones:</strong> {{ evento.consideraciones }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if archivos %}
+                            <div style="margin-top:0.75rem; padding-top:0.75rem; border-top:1px solid #e3eef0;">
+                                <strong style="display:block; margin-bottom:0.5rem; color:#000;">Archivos adjuntos:</strong>
+                                <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+                                    {% for archivo in archivos %}
+                                        <div style="background:#f7fafb; border:1px solid #e3eef0; border-radius:0.5rem; padding:0.5rem; display:inline-flex; align-items:center; gap:0.5rem;">
+                                            {% if archivo.es_imagen %}
+                                                <span>🖼️</span>
+                                            {% else %}
+                                                <span>📄</span>
+                                            {% endif %}
+                                            <a href="{{ archivo.archivo.url }}" target="_blank" style="color:#1aa3b0; text-decoration:none; font-weight:600; font-size:0.85rem;">
+                                                {{ archivo.nombre }}
+                                            </a>
+                                            <span style="color:#666; font-size:0.75rem;">({{ archivo.obtener_tamano_display }})</span>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            {% else %}
+                <p style="text-align:center; color:#666; padding:2rem;">No hay eventos clínicos registrados{% if filtro_fecha_desde or filtro_fecha_hasta or filtro_tipo_evento %} con los filtros aplicados{% endif %}.</p>
+            {% endif %}
+        </section>
+        </div>
+    </main>
+</div>
+
+<!-- Modal para agregar peso -->
+<div id="modal-agregar-peso-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="background-color:#3d9eb3; padding:1rem; border-radius:0.7rem 0.7rem 0 0; position:relative;">
+            <h2 style="font-size:1rem; font-weight:700; color:#ffffff; margin:0;">Agregar Peso</h2>
+            <button type="button" id="cerrar-modal-peso" style="position:absolute; top:1rem; right:1rem; background:none; border:none; cursor:pointer; color:#ffffff; padding:0; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#ffffff"/>
+                </svg>
+            </button>
+        </div>
+        <form id="form-agregar-peso" style="padding:1.5rem;">
+            {% csrf_token %}
+            <div style="margin-bottom:1rem;">
+                <label for="peso-input" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Peso (kg) <span style="color:#3d9eb3;">*</span></label>
+                <input type="number" id="peso-input" name="peso" step="0.1" min="0" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; font-family:inherit;" placeholder="Ej: 3.5">
+                <p style="margin:0.5rem 0 0; font-size:0.8rem; color:#666;">Ingresa el peso en kilogramos (máximo 1 decimal)</p>
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" id="cancelar-peso" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.65rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.65rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Agregar Peso
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+    <div class="footer-inner">
+        <div class="footer-col">
+            <div class="footer-brand-title">mascotia.app</div>
+            <p>Bitácora Digital de Salud Animal para Tutores. Centraliza el historial clínico de tus mascotas.</p>
+        </div>
+        <div class="footer-col">
+            <div class="footer-title">Enlaces rápidos</div>
+            <ul class="footer-list">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'home' %}">Panel</a></li>
+                <li><a href="#">Sobre Nosotros</a></li>
+                <li><a href="#">Servicios</a></li>
+                <li><a href="#">Preguntas Frecuentes</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <div class="footer-title">Soporte</div>
+            <ul class="footer-list">
+                <li><a href="#">Centro de Ayuda</a></li>
+                <li><a href="#">Términos y Condiciones</a></li>
+                <li><a href="#">Política de Privacidad</a></li>
+                <li><a href="#">Contacto</a></li>
+            </ul>
+        </div>
+        <div class="footer-col">
+            <div class="footer-title">Contacto</div>
+            <div class="footer-contact-item">
+                {% load static %}
+                <span class="footer-contact-icon">
+                    <img src="{% static 'registro/icons/correo.svg' %}" alt="Correo" style="width:14px; height:14px; object-fit:contain; filter: brightness(0) invert(1);">
+                </span>
+                <span>josefa@mascotia.app</span>
+            </div>
+            <div class="footer-contact-item">
+                {% load static %}
+                <span class="footer-contact-icon">
+                    <img src="{% static 'registro/icons/buscar-mapa.svg' %}" alt="Ubicación" style="width:14px; height:14px; object-fit:contain; filter: brightness(0) invert(1);">
+                </span>
+                <span>Santiago, Chile</span>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <div class="footer-bottom-inner">
+            <span>© 2024 Mascotia.app. Todos los derechos reservados.</span>
+            <div class="footer-socials">
+                <a href="#" class="social-icon">f</a>
+                <a href="#" class="social-icon instagram">IG</a>
+                <a href="#" class="social-icon">in</a>
+                <a href="#" class="social-icon">X</a>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<script>
+function updateFileLabel(input) {
+    const fileCount = input.files.length;
+    const labelElement = document.getElementById('archivos-seleccionados');
+    if (fileCount > 0 && labelElement) {
+        labelElement.textContent = `${fileCount} archivo${fileCount > 1 ? 's' : ''} seleccionado${fileCount > 1 ? 's' : ''}`;
+        labelElement.style.color = '#3d9eb3';
+        labelElement.style.fontWeight = '600';
+    } else if (labelElement) {
+        labelElement.textContent = 'Ningún archivo seleccionado';
+        labelElement.style.color = '#999';
+        labelElement.style.fontWeight = 'normal';
+    }
+}
+
+function updateFileLabelAndSubmit(input) {
+    updateFileLabel(input);
+    // Enviar automáticamente el formulario cuando se seleccionan archivos
+    if (input.files.length > 0) {
+        const form = document.getElementById('form-archivos-ficha');
+        if (form) {
+            form.submit();
+        }
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar campo de fecha de vacuna y campo "Otra"
+    const vacunasEstado = document.getElementById('id_vacunas_estado');
+    const ultimaVacunaFields = document.getElementById('ultima-vacuna-fields');
+    const fechaVacunaField = document.getElementById('id_ultima_vacuna_fecha');
+    const vacunaOtraTextoField = document.getElementById('vacuna-otra-texto-field');
+    const vacunaOtraTextoInput = document.getElementById('id_vacuna_otra_texto');
+    
+    if (vacunasEstado && ultimaVacunaFields && fechaVacunaField) {
+        function toggleFechaVacuna() {
+            const valor = vacunasEstado.value;
+            const vacunasEspecificas = ['Polivalente', 'Antirrábica', 'Bordetella', 'Leptospirosis', 
+                                      'Parvovirus', 'Moquillo', 'Hepatitis', 'Otra',
+                                      'Triple felina', 'Leucemia felina', 'Peritonitis infecciosa',
+                                      'Rinotraqueitis', 'Calicivirus', 'Panleucopenia'];
+            
+            if (vacunasEspecificas.includes(valor)) {
+                ultimaVacunaFields.style.display = 'block';
+                fechaVacunaField.disabled = false;
+                fechaVacunaField.style.backgroundColor = '';
+                fechaVacunaField.style.cursor = '';
+                
+                // Mostrar campo de texto si es "Otra"
+                if (valor === 'Otra' && vacunaOtraTextoField && vacunaOtraTextoInput) {
+                    vacunaOtraTextoField.style.display = 'block';
+                    vacunaOtraTextoInput.style.display = 'block';
+                    vacunaOtraTextoInput.removeAttribute('disabled');
+                } else if (vacunaOtraTextoField && vacunaOtraTextoInput) {
+                    vacunaOtraTextoField.style.display = 'none';
+                    vacunaOtraTextoInput.style.display = 'none';
+                    vacunaOtraTextoInput.value = '';
+                }
+            } else {
+                ultimaVacunaFields.style.display = 'none';
+                fechaVacunaField.disabled = true;
+                fechaVacunaField.style.backgroundColor = '#f5f5f5';
+                fechaVacunaField.style.cursor = 'not-allowed';
+                fechaVacunaField.value = '';
+                if (vacunaOtraTextoField && vacunaOtraTextoInput) {
+                    vacunaOtraTextoField.style.display = 'none';
+                    vacunaOtraTextoInput.value = '';
+                }
+            }
+        }
+        
+        // Aplicar estado inicial
+        toggleFechaVacuna();
+        
+        vacunasEstado.addEventListener('change', toggleFechaVacuna);
+    }
+    
+
+    // Manejar checkbox "No tengo temperatura"
+    const noTengoTemperatura = document.getElementById('no_tengo_temperatura');
+    const temperaturaInput = document.getElementById('id_temperatura');
+    
+    if (noTengoTemperatura && temperaturaInput) {
+        function toggleTemperaturaInput() {
+            if (noTengoTemperatura.checked) {
+                temperaturaInput.disabled = true;
+                temperaturaInput.value = '';
+                temperaturaInput.style.backgroundColor = '#f5f5f5';
+                temperaturaInput.style.cursor = 'not-allowed';
+            } else {
+                temperaturaInput.disabled = false;
+                temperaturaInput.style.backgroundColor = '';
+                temperaturaInput.style.cursor = '';
+            }
+        }
+        
+        // Aplicar estado inicial
+        toggleTemperaturaInput();
+        
+        // Escuchar cambios
+        noTengoTemperatura.addEventListener('change', toggleTemperaturaInput);
+    }
+    
+    // Función para actualizar la etiqueta de archivos seleccionados y enviar el formulario
+    window.updateFileLabelAndSubmit = function(input) {
+        const files = input.files;
+        const label = document.getElementById('archivos-seleccionados');
+        if (label) {
+            if (files.length === 0) {
+                label.textContent = 'Ningún archivo seleccionado';
+            } else if (files.length === 1) {
+                label.textContent = files[0].name;
+            } else {
+                label.textContent = files.length + ' archivos seleccionados';
+            }
+        }
+        // Enviar formulario automáticamente
+        if (files.length > 0) {
+            document.getElementById('form-archivos-ficha').submit();
+        }
+    };
+});
+
+// ========== JAVASCRIPT PARA EL CALENDARIO ==========
+// Funciones globales para el modal de eventos
+window.abrirModalEventos = function(fechaSeleccionada) {
+    const modalEventosBackdrop = document.getElementById('modal-eventos-backdrop');
+    if (modalEventosBackdrop) {
+        modalEventosBackdrop.style.display = 'flex';
+        // Si se proporciona una fecha, establecerla en el campo de fecha
+        if (fechaSeleccionada) {
+            const fechaInput = document.getElementById('id_fecha_evento');
+            if (fechaInput) {
+                fechaInput.value = fechaSeleccionada;
+            }
+        }
+    }
+};
+
+window.cerrarModalEventos = function() {
+    const modalEventosBackdrop = document.getElementById('modal-eventos-backdrop');
+    if (modalEventosBackdrop) {
+        modalEventosBackdrop.style.display = 'none';
+        // Limpiar formulario
+        const form = document.getElementById('form-evento-calendario');
+        if (form) {
+            form.reset();
+        }
+    }
+};
+
+window.cerrarModalEventoExitoso = function() {
+    const modalEventoExitoso = document.getElementById('modal-evento-exitoso');
+    if (modalEventoExitoso) {
+        modalEventoExitoso.style.display = 'none';
+    }
+};
+
+// Funciones para el modal de editar información básica
+function abrirModalEditarInfoBasica() {
+    const modal = document.getElementById('modal-editar-info-backdrop');
+    if (modal) {
+        modal.style.display = 'flex';
+    }
+}
+
+function cerrarModalEditarInfoBasica() {
+    const modal = document.getElementById('modal-editar-info-backdrop');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// Cerrar modal al hacer clic fuera
+document.addEventListener('DOMContentLoaded', function() {
+    const modalBackdrop = document.getElementById('modal-editar-info-backdrop');
+    if (modalBackdrop) {
+        modalBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalBackdrop) {
+                cerrarModalEditarInfoBasica();
+            }
+        });
+    }
+    
+    // Manejar checkbox de temperatura
+    const noTengoTempCheckbox = document.getElementById('modal_no_tengo_temperatura');
+    const temperaturaInput = document.getElementById('modal_temperatura');
+    if (noTengoTempCheckbox && temperaturaInput) {
+        noTengoTempCheckbox.addEventListener('change', function() {
+            if (this.checked) {
+                temperaturaInput.disabled = true;
+                temperaturaInput.value = '';
+                temperaturaInput.style.backgroundColor = '#e0e0e0';
+            } else {
+                temperaturaInput.disabled = false;
+                temperaturaInput.style.backgroundColor = '#f5f5f5';
+            }
+        });
+        // Aplicar estado inicial
+        if (noTengoTempCheckbox.checked) {
+            temperaturaInput.disabled = true;
+            temperaturaInput.style.backgroundColor = '#e0e0e0';
+        }
+    }
+});
+
+// Función para eliminar archivo
+function eliminarArchivo(archivoId) {
+    if (confirm('¿Estás seguro de que deseas eliminar este archivo?')) {
+        // Crear un formulario para enviar la solicitud de eliminación
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '{% url "bitacora_mascota" mascota.id %}';
+        
+        // Agregar token CSRF
+        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrfmiddlewaretoken';
+            csrfInput.value = csrfToken.value;
+            form.appendChild(csrfInput);
+        }
+        
+        // Agregar campo para identificar la acción
+        const actionInput = document.createElement('input');
+        actionInput.type = 'hidden';
+        actionInput.name = 'eliminar_archivo';
+        actionInput.value = '1';
+        form.appendChild(actionInput);
+        
+        // Agregar ID del archivo
+        const archivoInput = document.createElement('input');
+        archivoInput.type = 'hidden';
+        archivoInput.name = 'archivo_id';
+        archivoInput.value = archivoId;
+        form.appendChild(archivoInput);
+        
+        // Enviar formulario
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Funciones para el modal de eventos
+window.abrirModalEventos = function(tipoEvento) {
+    const modal = document.getElementById('modal-eventos-backdrop');
+    if (modal) {
+        modal.style.display = 'flex';
+        // Si se especifica un tipo de evento, pre-seleccionarlo
+        if (tipoEvento) {
+            const tipoSelect = document.querySelector('select[name="tipo_evento"]');
+            if (tipoSelect) {
+                tipoSelect.value = tipoEvento;
+            }
+        }
+    }
+};
+
+window.cerrarModalEventos = function() {
+    const modal = document.getElementById('modal-eventos-backdrop');
+    if (modal) {
+        modal.style.display = 'none';
+        // Limpiar el formulario
+        const form = document.getElementById('form-evento-calendario');
+        if (form) {
+            form.reset();
+        }
+    }
+};
+
+// Modal de eventos - event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const modalEventosBackdrop = document.getElementById('modal-eventos-backdrop');
+    const cerrarModalEventosBtn = document.getElementById('cerrar-modal-eventos');
+    const cancelarModalEventosBtn = document.getElementById('cancelar-modal-eventos');
+    
+    if (cerrarModalEventosBtn) {
+        cerrarModalEventosBtn.addEventListener('click', window.cerrarModalEventos);
+    }
+    
+    if (cancelarModalEventosBtn) {
+        cancelarModalEventosBtn.addEventListener('click', window.cerrarModalEventos);
+    }
+    
+    if (modalEventosBackdrop) {
+        modalEventosBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalEventosBackdrop) {
+                window.cerrarModalEventos();
+            }
+        });
+    }
+});
+</script>
+
+<!-- Modal de Eventos -->
+<div id="modal-eventos-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:600px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto;">
+        <!-- Header con ícono y título -->
+        <div style="background-color:#3d9eb3; padding:1rem; border-radius:0.7rem 0.7rem 0 0; position:relative;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#ffffff"/>
+                </svg>
+                <div style="flex:1;">
+                    <h2 style="font-size:0.95rem; font-weight:700; color:#ffffff; margin:0;">Agregar evento a la bitácora</h2>
+                    <p style="font-size:0.6rem; color:#ffffff; margin:0.25rem 0 0; opacity:0.95;">Registra citas con el veterinario, medicaciones, curaciones, vacunas, desparasitaciones y comentarios.</p>
+                </div>
+                <button type="button" id="cerrar-modal-eventos" style="background:none; border:none; cursor:pointer; color:#ffffff; padding:0; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s; flex-shrink:0;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#ffffff"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Contenido del formulario -->
+        <div style="padding:1rem;">
+            <form method="post" id="form-evento-calendario" style="display:grid; gap:0.75rem;">
+                {% csrf_token %}
+                <input type="hidden" name="guardar_evento" value="1" />
+                
+                <!-- Mascota (oculto, ya está determinada) -->
+                <input type="hidden" name="mascota_id" value="{{ mascota.id }}" />
+                
+                <!-- Fecha Evento -->
+                <div>
+                    <label for="id_fecha_evento" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Fecha Evento <span style="color:#3d9eb3;">*</span></label>
+                    <input type="date" name="fecha_evento" id="id_fecha_evento" required class="form-control w-full" style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem;">
+                    {% if evento_form.fecha_evento.errors %}
+                        <p style="color:#3d9eb3; font-size:0.5rem; margin-top:0.25rem;">{{ evento_form.fecha_evento.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                
+                <!-- Resto del formulario (similar a home.html) -->
+                <!-- Por brevedad, incluyo los campos principales -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                    <div>
+                        <label for="{{ evento_form.hora_evento.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Hora</label>
+                        {{ evento_form.hora_evento }}
+                    </div>
+                    <div>
+                        <label for="{{ evento_form.tipo_evento.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Tipo de Evento <span style="color:#3d9eb3;">*</span></label>
+                        <select name="{{ evento_form.tipo_evento.name }}" id="{{ evento_form.tipo_evento.id_for_label }}" required style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem; background-color:#ffffff;">
+                            <option value="">Selecciona</option>
+                            {% for choice in evento_form.tipo_evento.field.choices %}
+                            {% if choice.0 %}
+                            <option value="{{ choice.0 }}">{{ choice.1 }}</option>
+                            {% endif %}
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="{{ evento_form.veterinario.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Veterinario</label>
+                    <input type="text" name="{{ evento_form.veterinario.name }}" id="{{ evento_form.veterinario.id_for_label }}" value="{{ evento_form.veterinario.value|default:'' }}" placeholder="Nombre del veterinario" style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem; background-color:#ffffff;">
+                </div>
+                
+                <div>
+                    <label for="{{ evento_form.descripcion.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Descripción</label>
+                    {{ evento_form.descripcion }}
+                </div>
+                
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                    <div>
+                        <label for="{{ evento_form.medicacion.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Medicación</label>
+                        {{ evento_form.medicacion }}
+                    </div>
+                    <div>
+                        <label for="{{ evento_form.consideraciones.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Consideraciones</label>
+                        {{ evento_form.consideraciones }}
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem; padding-top:0.75rem; border-top:1px solid #e0e0e0;">
+                    <button type="button" id="cancelar-modal-eventos" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.4rem 1rem; border-radius:0.25rem; font-weight:600; cursor:pointer; font-size:0.55rem;">
+                        Cancelar
+                    </button>
+                    <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.4rem 1rem; border-radius:0.25rem; font-weight:600; cursor:pointer; font-size:0.55rem;">
+                        Agregar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Editar Información Básica -->
+<div id="modal-editar-info-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:700px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto;">
+        <!-- Header con ícono y título -->
+        <div style="background-color:#3d9eb3; padding:1.25rem; border-radius:0.7rem 0.7rem 0 0; position:relative;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/>
+                </svg>
+                <div style="flex:1;">
+                    <h2 style="font-size:1.1rem; font-weight:700; color:#ffffff; margin:0;">Editar Información Básica</h2>
+                    <p style="font-size:0.8rem; color:#ffffff; margin:0.3rem 0 0; opacity:0.95;">Actualiza los datos de la bitácora de {{ mascota.nombre }}</p>
+                </div>
+                <button type="button" onclick="cerrarModalEditarInfoBasica()" style="background:none; border:none; cursor:pointer; color:#ffffff; padding:0; width:32px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s; flex-shrink:0;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#ffffff"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Contenido del formulario -->
+        <div style="padding:1.5rem;">
+            <form method="post" id="form-editar-info-basica" enctype="multipart/form-data" style="display:grid; gap:1.25rem;">
+                {% csrf_token %}
+                <input type="hidden" name="guardar_ficha" value="1" />
+                
+                <!-- Primera fila: Fecha de Nacimiento, Edad, Color de Pelaje -->
+                <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+                    <div>
+                        <label for="modal_fecha_nacimiento" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha de Nacimiento</label>
+                        <input type="date" name="fecha_nacimiento" id="modal_fecha_nacimiento" value="{% if mascota.fecha_nacimiento %}{{ mascota.fecha_nacimiento|date:'Y-m-d' }}{% endif %}" style="width:100%; padding:0.65rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#f5f5f5;">
+                    </div>
+                    <div>
+                        <label for="modal_color_pelaje" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Color de Pelaje</label>
+                        <input type="text" name="color_pelaje" id="modal_color_pelaje" value="{% if mascota.color_pelaje %}{{ mascota.color_pelaje }}{% endif %}" placeholder="Ej: Beige" style="width:100%; padding:0.65rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#f5f5f5;">
+                    </div>
+                    <div>
+                        <label style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Edad</label>
+                        <div style="padding:0.65rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#f5f5f5; color:#666;">
+                            {% if mascota.edad %}{{ mascota.edad }}{% else %}—{% endif %}
+                        </div>
+                        <p style="margin:0.25rem 0 0; font-size:0.75rem; color:#666;">Se calcula automáticamente</p>
+                    </div>
+                </div>
+                
+                <!-- Alergias -->
+                <div>
+                    <label for="modal_alergias" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Alergias</label>
+                    <textarea name="alergias" id="modal_alergias" rows="3" placeholder="Describe las alergias conocidas de tu mascota" style="width:100%; padding:0.65rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#f5f5f5; font-family:inherit; resize:vertical;">{% if ficha.alergias %}{{ ficha.alergias }}{% endif %}</textarea>
+                </div>
+                
+                <!-- Botones -->
+                <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:1rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                    <button type="button" onclick="cerrarModalEditarInfoBasica()" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.65rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                        Cancelar
+                    </button>
+                    <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.65rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Agregar Vacuna -->
+<div id="modal-vacuna-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="padding:1.5rem; border-bottom:1px solid #e0e0e0; position:relative;">
+            <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Agregar Vacuna</h2>
+            <button type="button" onclick="cerrarModalVacuna();" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; cursor:pointer; color:#666; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f5f5'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#666666"/>
+                </svg>
+            </button>
+        </div>
+        <form method="post" id="form-vacuna" style="padding:1.5rem; display:grid; gap:1.25rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_vacuna" value="1" />
+            
+            <div>
+                <label for="nombre_vacuna" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Nombre de la Vacuna</label>
+                <input type="text" name="nombre_vacuna" id="nombre_vacuna" placeholder="Rabia, Parvovirus, etc." required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="fecha_aplicacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha de Aplicación</label>
+                <input type="date" name="fecha_aplicacion" id="fecha_aplicacion" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="proxima_dosis" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Próxima Dosis</label>
+                <input type="date" name="proxima_dosis" id="proxima_dosis" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="veterinario_vacuna" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Veterinario</label>
+                <input type="text" name="veterinario_vacuna" id="veterinario_vacuna" placeholder="Dr. García" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="cerrarModalVacuna();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Agregar Control Veterinario -->
+<div id="modal-control-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="padding:1.5rem; border-bottom:1px solid #e0e0e0; position:relative;">
+            <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Agregar Registro Médico</h2>
+            <button type="button" onclick="cerrarModalControl();" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; cursor:pointer; color:#666; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f5f5'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#666666"/>
+                </svg>
+            </button>
+        </div>
+        <form method="post" id="form-control" style="padding:1.5rem; display:grid; gap:1.25rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_control" value="1" />
+            
+            <div>
+                <label for="tipo_consulta" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Tipo de Consulta</label>
+                <input type="text" name="tipo_consulta" id="tipo_consulta" placeholder="Control, Emergencia, etc." required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="veterinario_control" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Veterinario</label>
+                <input type="text" name="veterinario_control" id="veterinario_control" placeholder="Dr. García" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="fecha_control" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha</label>
+                <input type="date" name="fecha_control" id="fecha_control" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="notas_control" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Notas</label>
+                <textarea name="notas_control" id="notas_control" rows="4" placeholder="Diagnóstico, tratamiento, observaciones..." style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="cerrarModalControl();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#40e0d0; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Agregar Visita a Peluquería -->
+<div id="modal-peluqueria-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="padding:1.5rem; border-bottom:1px solid #e0e0e0; position:relative;">
+            <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Agregar Visita a Peluquería</h2>
+            <button type="button" onclick="cerrarModalPeluqueria();" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; cursor:pointer; color:#666; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f5f5'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#666666"/>
+                </svg>
+            </button>
+        </div>
+        <form method="post" id="form-peluqueria" style="padding:1.5rem; display:grid; gap:1.25rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_peluqueria" value="1" />
+            
+            <div>
+                <label for="tipo_servicio" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Tipo de Servicio</label>
+                <select name="tipo_servicio" id="tipo_servicio" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+                    <option value="">Seleccione un servicio</option>
+                    <option value="Baño y Corte Completo">Baño y Corte Completo</option>
+                    <option value="Baño Express">Baño Express</option>
+                    <option value="Corte de Pelo">Corte de Pelo</option>
+                    <option value="Baño">Baño</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="establecimiento" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Establecimiento</label>
+                <input type="text" name="establecimiento" id="establecimiento" placeholder="Pet Spa Deluxe" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="fecha_visita" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha de la Visita</label>
+                <input type="date" name="fecha_visita" id="fecha_visita" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="servicios_adicionales" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Servicios Adicionales</label>
+                <textarea name="servicios_adicionales" id="servicios_adicionales" rows="3" placeholder="Ej: Limpieza de oídos, corte de uñas..." style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            
+            <div>
+                <label for="proxima_visita" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Próxima Visita Sugerida</label>
+                <input type="date" name="proxima_visita" id="proxima_visita" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="cerrarModalPeluqueria();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#9c27b0; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Agregar Desparasitación -->
+<div id="modal-desparasitacion-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="padding:1.5rem; border-bottom:1px solid #e0e0e0; position:relative;">
+            <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Agregar Desparasitación</h2>
+            <button type="button" onclick="cerrarModalDesparasitacion();" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; cursor:pointer; color:#666; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f5f5'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#666666"/>
+                </svg>
+            </button>
+        </div>
+        <form method="post" id="form-desparasitacion" style="padding:1.5rem; display:grid; gap:1.25rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_desparasitacion" value="1" />
+            
+            <div>
+                <label for="tipo_desparasitacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Tipo</label>
+                <select name="tipo_desparasitacion" id="tipo_desparasitacion" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+                    <option value="">Seleccione un tipo</option>
+                    <option value="interna">Desparasitación Interna</option>
+                    <option value="externa">Desparasitación Externa</option>
+                </select>
+            </div>
+            
+            <div>
+                <label for="producto" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Producto</label>
+                <input type="text" name="producto" id="producto" placeholder="Drontal Plus, Bravecto, etc." required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="fecha_desparasitacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha</label>
+                <input type="date" name="fecha_desparasitacion" id="fecha_desparasitacion" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="proxima_dosis_desparasitacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Próxima Dosis</label>
+                <input type="date" name="proxima_dosis_desparasitacion" id="proxima_dosis_desparasitacion" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="frecuencia" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Frecuencia</label>
+                <input type="text" name="frecuencia" id="frecuencia" placeholder="Cada 3 meses, Mensual, etc." style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="cerrarModalDesparasitacion();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#ff9800; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Agregar Medicamento -->
+<div id="modal-medicamento-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="padding:1.5rem; border-bottom:1px solid #e0e0e0; position:relative;">
+            <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Agregar Medicamento</h2>
+            <button type="button" onclick="cerrarModalMedicamento();" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; cursor:pointer; color:#666; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f5f5'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#666666"/>
+                </svg>
+            </button>
+        </div>
+        <form method="post" id="form-medicamento" style="padding:1.5rem; display:grid; gap:1.25rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_medicamento" value="1" />
+            
+            <div>
+                <label for="nombre_medicamento" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Nombre del Medicamento</label>
+                <input type="text" name="nombre_medicamento" id="nombre_medicamento" placeholder="Omeprazol 20mg" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="indicacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Indicación</label>
+                <input type="text" name="indicacion" id="indicacion" placeholder="Para gastritis" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="dosis" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Dosis</label>
+                <input type="text" name="dosis" id="dosis" placeholder="1 comprimido" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="frecuencia_medicamento" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Frecuencia</label>
+                <input type="text" name="frecuencia_medicamento" id="frecuencia_medicamento" placeholder="Cada 12 horas" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="inicio_medicamento" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Inicio</label>
+                <input type="date" name="inicio_medicamento" id="inicio_medicamento" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="fin_medicamento" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fin</label>
+                <input type="date" name="fin_medicamento" id="fin_medicamento" style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="cerrarModalMedicamento();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#2196f3; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal de Agregar Alimentación -->
+<div id="modal-alimentacion-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:500px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2);">
+        <div style="padding:1.5rem; border-bottom:1px solid #e0e0e0; position:relative;">
+            <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Agregar Registro de Alimentación</h2>
+            <button type="button" onclick="cerrarModalAlimentacion();" style="position:absolute; top:1.5rem; right:1.5rem; background:none; border:none; cursor:pointer; color:#666; padding:0; width:24px; height:24px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#f5f5f5'" onmouseout="this.style.backgroundColor='transparent'">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#666666"/>
+                </svg>
+            </button>
+        </div>
+        <form method="post" id="form-alimentacion" style="padding:1.5rem; display:grid; gap:1.25rem;">
+            {% csrf_token %}
+            <input type="hidden" name="guardar_alimentacion" value="1" />
+            
+            <div>
+                <label for="tipo_alimentacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Tipo</label>
+                <input type="text" name="tipo_alimentacion" id="tipo_alimentacion" placeholder="Cambio de dieta, Alimentación especial, etc." required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div>
+                <label for="descripcion_alimentacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Descripción</label>
+                <textarea name="descripcion_alimentacion" id="descripcion_alimentacion" rows="4" placeholder="Detalles sobre la alimentación..." style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff; font-family:inherit; resize:vertical;"></textarea>
+            </div>
+            
+            <div>
+                <label for="fecha_alimentacion" style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha</label>
+                <input type="date" name="fecha_alimentacion" id="fecha_alimentacion" required style="width:100%; padding:0.75rem; border:1px solid #e0e0e0; border-radius:0.5rem; font-size:0.9rem; background-color:#ffffff;">
+            </div>
+            
+            <div style="display:flex; justify-content:flex-end; gap:0.75rem; margin-top:0.5rem; padding-top:1rem; border-top:1px solid #e0e0e0;">
+                <button type="button" onclick="cerrarModalAlimentacion();" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Cancelar
+                </button>
+                <button type="submit" style="background-color:#40e0d0; color:#ffffff; border:none; padding:0.75rem 1.5rem; border-radius:0.5rem; font-weight:600; cursor:pointer; font-size:0.9rem;">
+                    Guardar
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Variable global para el gráfico de peso
+    let pesoChart = null;
+    
+    // Gráfico de Peso
+    const pesoCtx = document.getElementById('peso-chart-{{ mascota.id }}');
+    if (pesoCtx) {
+        {% if ultimos_registros_peso|length > 0 %}
+        const historialPeso = {{ historial_peso_json|safe }};
+        pesoChart = new Chart(pesoCtx, {
+            type: 'line',
+            data: {
+                labels: historialPeso.map(item => {
+                    const date = new Date(item.fecha);
+                    return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+                }),
+                datasets: [{
+                    label: 'Peso (kg)',
+                    data: historialPeso.map(item => item.peso),
+                    borderColor: '#3d9eb3',
+                    backgroundColor: 'rgba(61, 158, 179, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3d9eb3',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Peso: ' + context.parsed.y.toFixed(1) + ' kg';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Peso (kg)',
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            stepSize: 2
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        {% else %}
+        // Inicializar gráfico vacío si no hay datos
+        pesoChart = new Chart(pesoCtx, {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [{
+                    label: 'Peso (kg)',
+                    data: [],
+                    borderColor: '#3d9eb3',
+                    backgroundColor: 'rgba(61, 158, 179, 0.1)',
+                    borderWidth: 2,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#3d9eb3',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: { size: 14, weight: 'bold' },
+                        bodyFont: { size: 13 },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Peso: ' + context.parsed.y.toFixed(1) + ' kg';
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: 'Peso (kg)',
+                            font: { size: 12, weight: 'bold' }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            lineWidth: 1
+                        },
+                        ticks: {
+                            stepSize: 2
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        }
+                    }
+                }
+            }
+        });
+        {% endif %}
+    }
+    
+    // Modal para agregar peso
+    const modalPesoBackdrop = document.getElementById('modal-agregar-peso-backdrop');
+    const cerrarModalPeso = document.getElementById('cerrar-modal-peso');
+    const cancelarPeso = document.getElementById('cancelar-peso');
+    const formAgregarPeso = document.getElementById('form-agregar-peso');
+    
+    window.abrirModalAgregarPeso = function() {
+        if (modalPesoBackdrop) {
+            modalPesoBackdrop.style.display = 'flex';
+            const pesoInput = document.getElementById('peso-input');
+            if (pesoInput) {
+                pesoInput.focus();
+            }
+        }
+    };
+    
+    function cerrarModalPesoFunc() {
+        if (modalPesoBackdrop) {
+            modalPesoBackdrop.style.display = 'none';
+            if (formAgregarPeso) {
+                formAgregarPeso.reset();
+            }
+        }
+    }
+    
+    if (cerrarModalPeso) {
+        cerrarModalPeso.addEventListener('click', cerrarModalPesoFunc);
+    }
+    
+    if (cancelarPeso) {
+        cancelarPeso.addEventListener('click', cerrarModalPesoFunc);
+    }
+    
+    if (modalPesoBackdrop) {
+        modalPesoBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalPesoBackdrop) {
+                cerrarModalPesoFunc();
+            }
+        });
+    }
+    
+    // Manejar el envío del formulario de peso
+    if (formAgregarPeso) {
+        formAgregarPeso.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const pesoInput = document.getElementById('peso-input');
+            const peso = parseFloat(pesoInput.value);
+            
+            if (!peso || peso <= 0) {
+                alert('Por favor ingresa un peso válido mayor a 0');
+                return;
+            }
+            
+            // Validar que tenga máximo 1 decimal
+            const pesoStr = pesoInput.value;
+            const decimalPart = pesoStr.split('.')[1];
+            if (decimalPart && decimalPart.length > 1) {
+                alert('El peso solo puede tener 1 decimal');
+                return;
+            }
+            
+            // Enviar datos via AJAX
+            const formData = new FormData();
+            formData.append('peso', peso.toFixed(1));
+            formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
+            
+            fetch('{% url "agregar_peso_mascota" mascota.id %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Recargar la página para mostrar el nuevo dato
+                    location.reload();
+                } else {
+                    alert('Error: ' + (data.error || 'No se pudo agregar el peso'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error al agregar el peso. Por favor intenta nuevamente.');
+            });
+        });
+    }
+    
+    // Función para rotar la flecha de últimos registros
+    function toggleFlechaRegistros(event) {
+        const details = document.getElementById('ultimos-registros-details');
+        const flecha = document.getElementById('flecha-registros');
+        if (details && flecha) {
+            setTimeout(() => {
+                if (details.open) {
+                    flecha.style.transform = 'rotate(180deg)';
+                } else {
+                    flecha.style.transform = 'rotate(0deg)';
+                }
+            }, 10);
+        }
+    }
+    
+    // Función para editar peso (placeholder por ahora)
+    window.editarPeso = function(pesoId) {
+        if (pesoId) {
+            alert('Funcionalidad de edición de peso en desarrollo. Por ahora puedes agregar un nuevo registro.');
+        }
+    };
+    
+    // Inicializar la flecha según el estado inicial
+    const details = document.getElementById('ultimos-registros-details');
+    const flecha = document.getElementById('flecha-registros');
+    if (details && flecha && details.open) {
+        flecha.style.transform = 'rotate(180deg)';
+    }
+    
+    // Funciones para el modal de vacuna
+    window.abrirModalVacuna = function() {
+        const modal = document.getElementById('modal-vacuna-backdrop');
+        if (modal) {
+            modal.style.display = 'flex';
+            const nombreInput = document.getElementById('nombre_vacuna');
+            if (nombreInput) {
+                nombreInput.focus();
+            }
+        }
+    };
+    
+    window.cerrarModalVacuna = function() {
+        const modal = document.getElementById('modal-vacuna-backdrop');
+        if (modal) {
+            modal.style.display = 'none';
+            const form = document.getElementById('form-vacuna');
+            if (form) {
+                form.reset();
+            }
+        }
+    };
+    
+    // Funciones para el modal de control veterinario
+    window.abrirModalControl = function() {
+        const modal = document.getElementById('modal-control-backdrop');
+        if (modal) {
+            modal.style.display = 'flex';
+            const tipoInput = document.getElementById('tipo_consulta');
+            if (tipoInput) {
+                tipoInput.focus();
+            }
+        }
+    };
+    
+    window.cerrarModalControl = function() {
+        const modal = document.getElementById('modal-control-backdrop');
+        if (modal) {
+            modal.style.display = 'none';
+            const form = document.getElementById('form-control');
+            if (form) {
+                form.reset();
+            }
+        }
+    };
+    
+    // Event listeners para los modales
+    const modalVacunaBackdrop = document.getElementById('modal-vacuna-backdrop');
+    if (modalVacunaBackdrop) {
+        modalVacunaBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalVacunaBackdrop) {
+                cerrarModalVacuna();
+            }
+        });
+    }
+    
+    const modalControlBackdrop = document.getElementById('modal-control-backdrop');
+    if (modalControlBackdrop) {
+        modalControlBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalControlBackdrop) {
+                cerrarModalControl();
+            }
+        });
+    }
+    
+    // Funciones para el modal de peluquería
+    window.abrirModalPeluqueria = function() {
+        const modal = document.getElementById('modal-peluqueria-backdrop');
+        if (modal) {
+            modal.style.display = 'flex';
+            const tipoInput = document.getElementById('tipo_servicio');
+            if (tipoInput) {
+                tipoInput.focus();
+            }
+        }
+    };
+    
+    window.cerrarModalPeluqueria = function() {
+        const modal = document.getElementById('modal-peluqueria-backdrop');
+        if (modal) {
+            modal.style.display = 'none';
+            const form = document.getElementById('form-peluqueria');
+            if (form) {
+                form.reset();
+            }
+        }
+    };
+    
+    // Funciones para el modal de desparasitación
+    window.abrirModalDesparasitacion = function() {
+        const modal = document.getElementById('modal-desparasitacion-backdrop');
+        if (modal) {
+            modal.style.display = 'flex';
+            const tipoInput = document.getElementById('tipo_desparasitacion');
+            if (tipoInput) {
+                tipoInput.focus();
+            }
+        }
+    };
+    
+    window.cerrarModalDesparasitacion = function() {
+        const modal = document.getElementById('modal-desparasitacion-backdrop');
+        if (modal) {
+            modal.style.display = 'none';
+            const form = document.getElementById('form-desparasitacion');
+            if (form) {
+                form.reset();
+            }
+        }
+    };
+    
+    // Funciones para el modal de medicamento
+    window.abrirModalMedicamento = function() {
+        const modal = document.getElementById('modal-medicamento-backdrop');
+        if (modal) {
+            modal.style.display = 'flex';
+            const nombreInput = document.getElementById('nombre_medicamento');
+            if (nombreInput) {
+                nombreInput.focus();
+            }
+        }
+    };
+    
+    window.cerrarModalMedicamento = function() {
+        const modal = document.getElementById('modal-medicamento-backdrop');
+        if (modal) {
+            modal.style.display = 'none';
+            const form = document.getElementById('form-medicamento');
+            if (form) {
+                form.reset();
+            }
+        }
+    };
+    
+    // Funciones para el modal de alimentación
+    window.abrirModalAlimentacion = function() {
+        const modal = document.getElementById('modal-alimentacion-backdrop');
+        if (modal) {
+            modal.style.display = 'flex';
+            const tipoInput = document.getElementById('tipo_alimentacion');
+            if (tipoInput) {
+                tipoInput.focus();
+            }
+        }
+    };
+    
+    window.cerrarModalAlimentacion = function() {
+        const modal = document.getElementById('modal-alimentacion-backdrop');
+        if (modal) {
+            modal.style.display = 'none';
+            const form = document.getElementById('form-alimentacion');
+            if (form) {
+                form.reset();
+            }
+        }
+    };
+    
+    // Event listeners para los nuevos modales
+    const modalPeluqueriaBackdrop = document.getElementById('modal-peluqueria-backdrop');
+    if (modalPeluqueriaBackdrop) {
+        modalPeluqueriaBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalPeluqueriaBackdrop) {
+                cerrarModalPeluqueria();
+            }
+        });
+    }
+    
+    const modalDesparasitacionBackdrop = document.getElementById('modal-desparasitacion-backdrop');
+    if (modalDesparasitacionBackdrop) {
+        modalDesparasitacionBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalDesparasitacionBackdrop) {
+                cerrarModalDesparasitacion();
+            }
+        });
+    }
+    
+    const modalMedicamentoBackdrop = document.getElementById('modal-medicamento-backdrop');
+    if (modalMedicamentoBackdrop) {
+        modalMedicamentoBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalMedicamentoBackdrop) {
+                cerrarModalMedicamento();
+            }
+        });
+    }
+    
+    const modalAlimentacionBackdrop = document.getElementById('modal-alimentacion-backdrop');
+    if (modalAlimentacionBackdrop) {
+        modalAlimentacionBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalAlimentacionBackdrop) {
+                cerrarModalAlimentacion();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

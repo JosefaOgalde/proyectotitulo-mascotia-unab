@@ -1,0 +1,816 @@
+{% extends 'registro/base.html' %}
+{% load static %}
+
+{% block title %}Registro Mascota - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f5f5f5 !important;
+        margin: 0;
+        padding: 0;
+        padding-top: 62px;
+    }
+
+    .pet-container {
+        display: flex;
+        min-height: calc(100vh - 62px);
+        max-width: 1200px;
+        margin: 0 auto;
+        gap: 1rem;
+        padding: 0 24px;
+        align-items: stretch;
+        justify-content: center;
+        background-color: #f5f5f5;
+    }
+
+    .pet-left-panel {
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-end;
+        padding: 1.5rem 0.5rem 1.5rem 0;
+    }
+
+    .pet-image-container {
+        width: 100%;
+        max-width: 420px;
+        height: 100%;
+        min-height: 500px;
+        background-color: #f0f9fa;
+        border: 2px solid #5bb4c5;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .pet-image-container img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        width: auto;
+        height: auto;
+        border-radius: 1rem;
+    }
+
+    .pet-right-panel {
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 1.5rem 0 1.5rem 0.5rem;
+        background-color: #f5f5f5;
+        overflow: hidden;
+    }
+
+    .pet-card {
+        width: 100%;
+        max-width: 420px;
+        background-color: #ffffff;
+        border-radius: 1.25rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        padding: 1rem;
+        height: 100%;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #5bb4c5;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .pet-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #333333;
+        margin: 0;
+        text-align: left;
+    }
+    
+    .pet-title-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .pet-info-banner {
+        background-color: #e8f8f9;
+        border: 2px solid #5bb4c5;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 0.75rem;
+    }
+
+    .pet-info-box {
+        background-color: #e8e8e8;
+        border-radius: 0.75rem;
+        padding: 0.85rem 1rem;
+        margin-bottom: 0.85rem;
+        text-align: center;
+    }
+
+    .pet-info-box p {
+        margin: 0;
+        color: #000000;
+        font-size: 0.75rem;
+    }
+
+    .pet-info-box p:first-child {
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    .pet-info-box p:last-child {
+        opacity: 0.8;
+        font-size: 0.7rem;
+    }
+
+    .pet-greeting {
+        color: #000000;
+        opacity: 0.7;
+        font-size: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .pet-form {
+        flex: 1;
+        min-height: 0;
+    }
+
+    .form-section-title {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 0.85rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 0.3rem;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.55rem 0.75rem;
+        border: 1px solid #d1d5db;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        color: #000000;
+        background-color: #ffffff;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #5bb4c5;
+        box-shadow: 0 0 0 3px rgba(91, 180, 197, 0.1);
+    }
+
+    .toggle-container {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 0.75rem;
+        padding: 0.75rem;
+        background-color: #f5f5f5;
+        border-radius: 0.5rem;
+        cursor: pointer;
+    }
+
+    .toggle-container:hover {
+        background-color: #eeeeee;
+    }
+
+    .toggle-container input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+        margin: 0;
+    }
+
+    .toggle-container label {
+        cursor: pointer;
+        margin: 0;
+        flex: 1;
+        font-weight: 400;
+    }
+
+    #campos-edad-aproximada {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 0.75rem;
+    }
+
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem;
+        background-color: #f5f5f5;
+        border-radius: 0.5rem;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+        width: 1.25rem;
+        height: 1.25rem;
+        cursor: pointer;
+    }
+
+    .checkbox-container label {
+        margin: 0;
+        cursor: pointer;
+        font-weight: 400;
+    }
+
+    .form-error {
+        color: #ed99c5;
+        font-size: 0.8rem;
+        margin-top: 0.25rem;
+    }
+
+    .form-help {
+        font-size: 0.75rem;
+        color: #000000;
+        opacity: 0.6;
+        margin-top: 0.25rem;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 0.75rem 1.5rem;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .submit-button:hover {
+        background-color: #4a9ba8;
+    }
+
+    .pet-note {
+        font-size: 0.75rem;
+        color: #000000;
+        opacity: 0.7;
+        margin-top: 0.4rem;
+    }
+
+    @media (max-width: 1024px) {
+        .pet-container {
+            flex-direction: column;
+            padding: 1rem;
+        }
+
+        .pet-left-panel,
+        .pet-right-panel {
+            padding: 1rem;
+        }
+
+        .pet-image-container,
+        .pet-card {
+            min-height: 500px;
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .pet-navbar {
+            padding: 0.75rem 1rem;
+        }
+
+        .pet-container {
+            padding: 0.75rem;
+        }
+
+        .pet-card {
+            padding: 1.5rem;
+        }
+
+        #campos-edad-aproximada {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Mensaje de confirmación del perfil -->
+{% if messages %}
+    {% for message in messages %}
+        {% if message.tags == 'success' and 'Perfil completado' in message|stringformat:"s" %}
+        <div id="perfil-success-message" style="position: fixed; top: 80px; right: 24px; z-index: 200; max-width: 400px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; padding: 0.75rem 1rem; border-radius: 0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; align-items: center; gap: 0.75rem;">
+            <span style="color: #28a745; font-size: 1.25rem; font-weight: bold; flex-shrink: 0;">✓</span>
+            <span style="font-size: 0.9rem;">{{ message }}</span>
+        </div>
+        <script>
+            setTimeout(function() {
+                const msg = document.getElementById('perfil-success-message');
+                if (msg) {
+                    msg.style.transition = 'opacity 0.5s ease-out';
+                    msg.style.opacity = '0';
+                    setTimeout(function() {
+                        msg.remove();
+                    }, 500);
+                }
+            }, 5000);
+        </script>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+<div class="pet-container">
+    <!-- Panel izquierdo con imagen -->
+    <div class="pet-left-panel">
+            <div class="pet-image-container">
+            <img src="{% static 'registro/images/completar-perfil.jpeg' %}" alt="Mascotia - Completar perfil">
+        </div>
+    </div>
+
+    <!-- Panel derecho con formulario -->
+    <div class="pet-right-panel">
+        <div class="pet-card">
+            <!-- Título y Banner de información de mascota -->
+            <div class="pet-title-header">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background-color: #5bb4c5; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                    <img src="{% static 'registro/icons/mascota.svg' %}" alt="Mascota" style="width: 24px; height: 24px; filter: brightness(0) invert(1);">
+                </div>
+                <h1 class="pet-title" style="margin: 0; text-align: left;">Información de tu mascota</h1>
+            </div>
+            
+            <div class="pet-info-banner">
+                <p style="margin: 0; font-size: 0.85rem; color: #666666; line-height: 1.5;">Esta data nos ayudará a construir la bitácora de salud de tu mascota.</p>
+            </div>
+
+            <!-- Formulario -->
+            <form method="post" class="pet-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Campo Foto -->
+                <div class="form-group">
+                    <label for="{{ form.foto.id_for_label }}">
+                        {{ form.foto.label }}
+                    </label>
+                    <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="file" name="foto" id="{{ form.foto.id_for_label }}" accept="image/*" style="display: none;">
+                        <label for="{{ form.foto.id_for_label }}" style="padding: 0.5rem 1rem; background-color: #e0e0e0; border-radius: 0.5rem; cursor: pointer; font-size: 0.85rem; font-weight: 500; color: #333333; border: none; display: inline-block;">
+                            Seleccionar archivo
+                        </label>
+                        <span id="nombre-archivo" style="font-size: 0.85rem; color: #666666;">Ningún archivo seleccionado</span>
+                    </div>
+                    {% if form.foto.help_text %}
+                        <p class="form-help">{{ form.foto.help_text }}</p>
+                    {% endif %}
+                    {% if form.foto.errors %}
+                        <div class="form-error">
+                            {% for error in form.foto.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campos en dos columnas: Nombre y Especie -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+                    <!-- Campo Nombre -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="{{ form.nombre.id_for_label }}">
+                            {{ form.nombre.label }}
+                        </label>
+                        {{ form.nombre }}
+                    </div>
+
+                    <!-- Campo Especie -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="{{ form.especie.id_for_label }}">
+                            {{ form.especie.label }}
+                        </label>
+                        {{ form.especie }}
+                    </div>
+                </div>
+
+                <!-- Campos en dos columnas: Raza y Color pelaje -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+                    <!-- Campo Raza -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="{{ form.raza.id_for_label }}">
+                            {{ form.raza.label }}
+                        </label>
+                        {{ form.raza }}
+                    </div>
+
+                    <!-- Campo Color pelaje -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="{{ form.color_pelaje.id_for_label }}">
+                            {{ form.color_pelaje.label }}
+                        </label>
+                        {{ form.color_pelaje }}
+                    </div>
+                </div>
+
+                <!-- Campo Fecha de nacimiento o edad aproximada -->
+                <div class="form-group">
+                    <label style="display:block; font-size:0.9rem; font-weight:600; color:#000000; margin-bottom:0.5rem;">Fecha de nacimiento o edad aproximada</label>
+                    
+                    <div id="campo-fecha-exacta" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.75rem;">
+                        <div style="flex: 1;">
+                            {{ form.fecha_nacimiento }}
+                        </div>
+                        <span style="font-size: 1.2rem; color: #5bb4c5; cursor: pointer; user-select: none;" onclick="document.getElementById('{{ form.fecha_nacimiento.id_for_label }}').showPicker ? document.getElementById('{{ form.fecha_nacimiento.id_for_label }}').showPicker() : document.getElementById('{{ form.fecha_nacimiento.id_for_label }}').focus()">📅</span>
+                    </div>
+                    <style>
+                        #{{ form.fecha_nacimiento.id_for_label }}::placeholder {
+                            color: #999;
+                        }
+                    </style>
+                    {% if form.fecha_nacimiento.help_text %}
+                        <p class="form-help" style="margin-top: -0.5rem; margin-bottom: 0.75rem;">{{ form.fecha_nacimiento.help_text }}</p>
+                    {% endif %}
+                    {% if form.fecha_nacimiento.errors %}
+                        <div class="form-error">
+                            {% for error in form.fecha_nacimiento.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="toggle-container">
+                        {{ form.usar_edad_aproximada }}
+                        <label for="{{ form.usar_edad_aproximada.id_for_label }}" style="margin:0; font-size:0.9rem; color:#000000; cursor:pointer; user-select:none; flex:1;">
+                            No recuerdo la fecha
+                        </label>
+                    </div>
+                    
+                    <div id="campos-edad-aproximada" style="display:none;">
+                        <label for="{{ form.edad_anios_aproximados.id_for_label }}" style="display:block; font-size:0.85rem; font-weight:500; color:#000000; margin-bottom:0.35rem;">
+                            Edad aproximada (años)
+                        </label>
+                        {{ form.edad_anios_aproximados }}
+                        {% if form.edad_anios_aproximados.help_text %}
+                            <p class="form-help">{{ form.edad_anios_aproximados.help_text }}</p>
+                        {% endif %}
+                        {% if form.edad_anios_aproximados.errors %}
+                            <div class="form-error">
+                                {% for error in form.edad_anios_aproximados.errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Campos en dos columnas: Sexo y Esterilizado -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-bottom:0.85rem;">
+                    <!-- Campo Sexo -->
+                    <div class="form-group" style="margin-bottom:0;">
+                        <label for="{{ form.sexo.id_for_label }}">
+                            {{ form.sexo.label }}
+                        </label>
+                        {{ form.sexo }}
+                    </div>
+
+                    <!-- Campo Esterilizado -->
+                    <div class="form-group" style="margin-bottom:0; display:flex; flex-direction:column; justify-content:flex-end;">
+                        <label style="display:block; font-size:0.8rem; font-weight:600; color:#000000; margin-bottom:0.3rem;">{{ form.esterilizado.label }}</label>
+                        <div class="checkbox-container" style="margin:0; padding:0.75rem;">
+                            {{ form.esterilizado }}
+                            <label for="{{ form.esterilizado.id_for_label }}" style="margin:0; cursor:pointer; font-weight:400;">
+                                Sí
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <p class="form-help" style="margin-top: -0.5rem; margin-bottom: 0.85rem; font-size: 0.7rem; color: #666;">Si no estás seguro, deja el campo en blanco.</p>
+
+                <p class="pet-note">
+                    El ID de la mascota se generará automáticamente al guardar.
+                </p>
+
+                <!-- Botón de envío -->
+                <button type="submit" name="guardar" class="submit-button">Guardar mascota</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const checkboxId = '{{ form.usar_edad_aproximada.id_for_label }}';
+    const checkboxEdadAproximada = document.getElementById(checkboxId);
+    const campoFechaExacta = document.getElementById('campo-fecha-exacta');
+    const camposEdadAproximada = document.getElementById('campos-edad-aproximada');
+    const inputFechaNacimiento = document.getElementById('fecha_nacimiento_input');
+    const inputEdadAnios = document.getElementById('edad_anios_aproximados');
+    const inputEdadMeses = document.getElementById('edad_meses_aproximados');
+    const toggleContainer = document.querySelector('.toggle-container');
+    
+    function toggleCampos() {
+        if (!checkboxEdadAproximada || !campoFechaExacta || !camposEdadAproximada) {
+            return;
+        }
+        
+        if (checkboxEdadAproximada.checked) {
+            campoFechaExacta.style.display = 'none';
+            camposEdadAproximada.style.display = 'block';
+            if (inputFechaNacimiento) {
+                inputFechaNacimiento.value = '';
+                inputFechaNacimiento.removeAttribute('required');
+            }
+            if (inputEdadAnios) {
+                inputEdadAnios.setAttribute('required', 'required');
+            }
+        } else {
+            campoFechaExacta.style.display = 'flex';
+            camposEdadAproximada.style.display = 'none';
+            if (inputFechaNacimiento) {
+                inputFechaNacimiento.removeAttribute('required');
+            }
+            if (inputEdadAnios) {
+                inputEdadAnios.removeAttribute('required');
+                inputEdadAnios.value = '';
+            }
+            if (inputEdadMeses) {
+                inputEdadMeses.value = '';
+            }
+        }
+    }
+    
+    if (checkboxEdadAproximada) {
+        checkboxEdadAproximada.addEventListener('change', toggleCampos);
+        
+        if (toggleContainer) {
+            toggleContainer.addEventListener('click', function(e) {
+                if (e.target !== checkboxEdadAproximada && e.target.tagName !== 'LABEL') {
+                    checkboxEdadAproximada.click();
+                }
+            });
+        }
+        
+        toggleCampos();
+    }
+    
+    // Actualizar razas según la especie seleccionada
+    const especieSelect = document.getElementById('id_especie');
+    const razaSelect = document.getElementById('id_raza');
+    
+    if (especieSelect && razaSelect) {
+        const razasPerro = [
+            ['', 'Seleccionar raza'],
+            ['Labrador Retriever', 'Labrador Retriever'],
+            ['Golden Retriever', 'Golden Retriever'],
+            ['Pastor Alemán', 'Pastor Alemán'],
+            ['Bulldog Francés', 'Bulldog Francés'],
+            ['Bulldog Inglés', 'Bulldog Inglés'],
+            ['Beagle', 'Beagle'],
+            ['Poodle', 'Poodle'],
+            ['Rottweiler', 'Rottweiler'],
+            ['Yorkshire Terrier', 'Yorkshire Terrier'],
+            ['Boxer', 'Boxer'],
+            ['Dachshund', 'Dachshund'],
+            ['Siberian Husky', 'Siberian Husky'],
+            ['Chihuahua', 'Chihuahua'],
+            ['Border Collie', 'Border Collie'],
+            ['Shih Tzu', 'Shih Tzu'],
+            ['Maltés', 'Maltés'],
+            ['Mestizo', 'Mestizo'],
+            ['No lo sé', 'No lo sé'],
+        ];
+        
+        const razasGato = [
+            ['', 'Seleccionar raza'],
+            ['Persa', 'Persa'],
+            ['Maine Coon', 'Maine Coon'],
+            ['British Shorthair', 'British Shorthair'],
+            ['Ragdoll', 'Ragdoll'],
+            ['Siamés', 'Siamés'],
+            ['Bengalí', 'Bengalí'],
+            ['Abisinio', 'Abisinio'],
+            ['Sphynx', 'Sphynx'],
+            ['Scottish Fold', 'Scottish Fold'],
+            ['American Shorthair', 'American Shorthair'],
+            ['Ruso Azul', 'Ruso Azul'],
+            ['Noruego del Bosque', 'Noruego del Bosque'],
+            ['Mestizo', 'Mestizo'],
+            ['No lo sé', 'No lo sé'],
+        ];
+        
+        function actualizarRazas() {
+            const especie = especieSelect.value;
+            razaSelect.innerHTML = '';
+            
+            let razas = [];
+            if (especie === 'perro') {
+                razas = razasPerro;
+            } else if (especie === 'gato') {
+                razas = razasGato;
+            } else {
+                razas = [['', 'Selecciona primero la especie']];
+                razaSelect.disabled = true;
+            }
+            
+            razas.forEach(function(raza) {
+                const option = document.createElement('option');
+                option.value = raza[0];
+                option.textContent = raza[1];
+                razaSelect.appendChild(option);
+            });
+            
+            if (especie) {
+                razaSelect.disabled = false;
+            }
+        }
+        
+        especieSelect.addEventListener('change', actualizarRazas);
+        // Aplicar al cargar la página si ya hay una especie seleccionada
+        if (especieSelect.value) {
+            actualizarRazas();
+        }
+    }
+    
+    // Detectar cuando se carga una imagen
+    const fotoInput = document.getElementById('{{ form.foto.id_for_label }}');
+    const nombreArchivoSpan = document.getElementById('nombre-archivo');
+    if (fotoInput) {
+        fotoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar que sea una imagen
+                if (file.type.startsWith('image/')) {
+                    // Mostrar nombre del archivo
+                    if (nombreArchivoSpan) {
+                        nombreArchivoSpan.textContent = file.name;
+                    }
+                    // Mostrar notificación de éxito
+                    mostrarNotificacion('Imagen correctamente cargada', 'success');
+                } else {
+                    if (nombreArchivoSpan) {
+                        nombreArchivoSpan.textContent = 'Ningún archivo seleccionado';
+                    }
+                    mostrarNotificacion('El archivo seleccionado no es una imagen válida', 'error');
+                }
+            } else {
+                if (nombreArchivoSpan) {
+                    nombreArchivoSpan.textContent = 'Ningún archivo seleccionado';
+                }
+            }
+        });
+    }
+    
+    // Función para mostrar notificaciones
+    function mostrarNotificacion(mensaje, tipo) {
+        // Eliminar contenedor anterior si existe
+        const existingContainer = document.getElementById('messages-container');
+        if (existingContainer) {
+            existingContainer.remove();
+        }
+        
+        // Crear nuevo contenedor
+        const container = document.createElement('div');
+        container.id = 'messages-container';
+        container.style.cssText = 'position: fixed; top: 80px; right: 24px; z-index: 200; max-width: 400px;';
+        document.body.appendChild(container);
+        
+        const alert = document.createElement('div');
+        
+        let bgColor, borderColor, textColor, icon;
+        if (tipo === 'success') {
+            bgColor = '#d4edda';
+            borderColor = '#c3e6cb';
+            textColor = '#155724';
+            icon = '✓';
+        } else if (tipo === 'error') {
+            bgColor = '#f8d7da';
+            borderColor = '#f5c6cb';
+            textColor = '#721c24';
+            icon = '✗';
+        } else {
+            bgColor = '#d1ecf1';
+            borderColor = '#bee5eb';
+            textColor = '#0c5460';
+            icon = 'ℹ';
+        }
+        
+        alert.style.cssText = `word-wrap: break-word; background-color:${bgColor}; border:1px solid ${borderColor}; color:${textColor}; display:flex; align-items:center; gap:0.75rem; padding:0.75rem 1rem; border-radius:0.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.1);`;
+        
+        const iconSpan = document.createElement('span');
+        iconSpan.style.cssText = `color:${tipo === 'success' ? '#28a745' : tipo === 'error' ? '#dc3545' : '#17a2b8'}; font-size:1.25rem; font-weight:bold; flex-shrink:0;`;
+        iconSpan.textContent = icon;
+        
+        const messageSpan = document.createElement('span');
+        messageSpan.textContent = mensaje;
+        messageSpan.style.fontSize = '0.9rem';
+        
+        alert.appendChild(iconSpan);
+        alert.appendChild(messageSpan);
+        
+        container.appendChild(alert);
+        
+        // Auto-eliminar después de 5 segundos
+        setTimeout(function() {
+            alert.style.transition = 'opacity 0.5s ease-out';
+            alert.style.opacity = '0';
+            setTimeout(function() {
+                container.remove();
+            }, 500);
+        }, 5000);
+    }
+    
+    // Mostrar errores del formulario como notificaciones
+    {% if form.errors %}
+        {% for field, errors in form.errors.items %}
+            {% for error in errors %}
+                mostrarNotificacion('{{ error|escapejs }}', 'error');
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+    
+    {% if form.non_field_errors %}
+        {% for error in form.non_field_errors %}
+            mostrarNotificacion('{{ error|escapejs }}', 'error');
+        {% endfor %}
+    {% endif %}
+});
+</script>
+
+<!-- Popup de éxito -->
+{% if mostrar_popup %}
+<div id="popup-mascota" style="position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:1rem;">
+    <div style="background-color:#ffffff; border-radius:1.5rem; padding:2.5rem; max-width:500px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+        <div style="text-align:center; margin-bottom:2rem;">
+            <div style="width:80px; height:80px; border-radius:50%; background-color:#afcf5a; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem;">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#ffffff"/>
+                </svg>
+            </div>
+            <h2 style="font-size:1.35rem; font-weight:700; color:#000000; margin:0 0 0.5rem;">¡Has comenzado con la ficha de tu mascota!</h2>
+            <p style="color:#666; margin:0; font-size:0.9rem;">{{ mascota_guardada }} ha sido agregada exitosamente a tu bitácora.</p>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:1rem;">
+            <a href="{% url 'registro_mascota' %}" style="display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.85rem 1.5rem; border-radius:9999px; background-color:#afcf5a; color:#ffffff; border:1px solid #afcf5a; font-weight:700; text-decoration:none; font-size:0.95rem; cursor:pointer; transition:background-color 0.2s;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <ellipse cx="12" cy="16" rx="4" ry="3.5" fill="#ffffff"/>
+                    <circle cx="8.5" cy="10" r="2" fill="#ffffff"/>
+                    <circle cx="12" cy="8" r="2" fill="#ffffff"/>
+                    <circle cx="15.5" cy="10" r="2" fill="#ffffff"/>
+                    <circle cx="10.5" cy="12.5" r="1.5" fill="#ffffff"/>
+                    <circle cx="13.5" cy="12.5" r="1.5" fill="#ffffff"/>
+                </svg>
+                <span>Agregar otra mascota</span>
+            </a>
+            <a href="{% url 'home' %}" style="display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.85rem 1.5rem; border-radius:9999px; background-color:#ffffff; color:#333333; border:1px solid #d1d5db; font-weight:700; text-decoration:none; font-size:0.95rem; cursor:pointer; transition:background-color 0.2s;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                    <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" fill="#666666"/>
+                </svg>
+                <span>Ir al home</span>
+            </a>
+        </div>
+    </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const popup = document.getElementById('popup-mascota');
+    if (popup) {
+        // Cerrar popup al hacer clic fuera
+        popup.addEventListener('click', function(e) {
+            if (e.target === popup) {
+                popup.style.display = 'none';
+            }
+        });
+    }
+});
+</script>
+{% endif %}
+
+{% endblock %}

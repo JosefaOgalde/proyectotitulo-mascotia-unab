@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Mascotia.app{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --color-teal: #5bb4c5;
+            --color-lime: #d2de7d;
+            --color-pink: #ed99c5;
+            --color-cyan: #a8e3e1;
+            --color-cream: #fdf5e0;
+            --color-black: #000000;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: var(--color-black);
+            font-family: 'Poppins', 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body:has(.navbar-main) {
+            padding-top: 62px;
+        }
+
+        .text-primary { color: var(--color-black); }
+        .text-accent { color: var(--color-teal); }
+        .bg-teal { background-color: var(--color-teal); }
+        .bg-lime { background-color: var(--color-lime); }
+        .bg-pink { background-color: var(--color-pink); }
+        .bg-cyan { background-color: var(--color-cyan); }
+        .bg-cream { background-color: var(--color-cream); }
+        .border-teal { border-color: var(--color-teal); }
+        .border-lime { border-color: var(--color-lime); }
+        .border-pink { border-color: var(--color-pink); }
+        .border-cyan { border-color: var(--color-cyan); }
+        .shadow-soft {
+            box-shadow: none;
+        }
+        .card-shadow {
+            box-shadow: none;
+        }
+
+        .form-control {
+            background-color: var(--color-cream);
+            border: 1px solid var(--color-teal);
+            border-radius: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: var(--color-black);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .form-control::placeholder {
+            color: var(--color-teal);
+            opacity: 0.6;
+        }
+        .form-control:focus {
+            border-color: var(--color-teal);
+            outline: 2px solid var(--color-teal);
+        }
+
+        .alert-success {
+            background-color: var(--color-lime);
+            color: var(--color-black);
+        }
+        .alert-error {
+            background-color: var(--color-pink);
+            color: var(--color-black);
+        }
+        .alert-info {
+            background-color: var(--color-cyan);
+            color: var(--color-black);
+        }
+
+        @media (max-width: 1024px) {
+            body {
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                font-size: 0.9rem;
+            }
+            
+            .form-control {
+                padding: 0.65rem 0.9rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                font-size: 0.85rem;
+            }
+            
+            .form-control {
+                padding: 0.6rem 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+    {% block extra_css %}{% endblock %}
+    <style>
+        /* Navbar styles */
+        .navbar-main {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: #f8fbfc;
+            padding: 14px 0;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+            z-index: 50;
+            margin: 0;
+        }
+        .navbar-inner {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .navbar-logo {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 0.03em;
+            color: #00a9b4;
+            text-decoration: none;
+        }
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .navbar-btn {
+            background-color: #e0e0e0;
+            color: #333333;
+            border: none;
+            border-radius: 0.35rem;
+            font-weight: 600;
+            padding: 0.4rem 0.85rem;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background-color 0.2s;
+        }
+        
+        .navbar-btn-icon {
+            width: 20px;
+            height: 20px;
+            filter: brightness(0) saturate(100%);
+            opacity: 0.8;
+            object-fit: contain;
+        }
+        
+        .navbar-btn-icon-white {
+            filter: brightness(0) invert(1);
+            opacity: 1;
+        }
+        .navbar-btn:hover {
+            background-color: #d0d0d0;
+        }
+        .navbar-btn-primary {
+            background-color: #3d9eb3;
+            color: #ffffff;
+        }
+        .navbar-btn-primary:hover {
+            background-color: #2d8ba0;
+        }
+        .navbar-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .navbar-dropdown-content {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background-color: #ffffff;
+            min-width: 280px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            z-index: 1000;
+            overflow: hidden;
+        }
+        .navbar-dropdown.active .navbar-dropdown-content {
+            display: block;
+        }
+        .navbar-dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            text-decoration: none;
+            color: #000000;
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .navbar-dropdown-item:last-child {
+            border-bottom: none;
+        }
+        .navbar-dropdown-item:hover {
+            background-color: #f5f5f5;
+        }
+        .navbar-dropdown-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            overflow: hidden;
+        }
+        .navbar-dropdown-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .navbar-dropdown-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .navbar-dropdown-name {
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #000000;
+            margin-bottom: 0.25rem;
+        }
+        .navbar-dropdown-desc {
+            font-size: 0.8rem;
+            color: #666666;
+        }
+        .navbar-chevron {
+            transition: transform 0.2s;
+            font-size: 0.6rem;
+        }
+        .navbar-dropdown.active .navbar-chevron {
+            transform: rotate(180deg);
+        }
+    </style>
+</head>
+<body>
+    {% if user.is_authenticated %}
+    <!-- Navbar -->
+    <nav class="navbar-main">
+        <div class="navbar-inner">
+            <a href="{% url 'home' %}" class="navbar-logo">mascotia.app</a>
+            <div class="navbar-actions">
+                <a href="{% url 'perfil_tutor' %}" class="navbar-btn">
+                    {% load static %}
+                    <img src="{% static 'registro/icons/usuario.svg' %}" alt="Usuario" class="navbar-btn-icon">
+                    <span>Perfil Tutor</span>
+                </a>
+                {% if mascotas_usuario|length > 0 %}
+                <div class="navbar-dropdown" id="navbar-dropdown-bitacora">
+                    <button type="button" class="navbar-btn" onclick="{% if mascotas_usuario|length > 1 %}toggleDropdown('navbar-dropdown-bitacora'){% else %}window.location.href='{% url 'bitacora_mascota' mascotas_usuario.0.id %}'{% endif %}">
+                        <img src="{% static 'registro/icons/bitacora.svg' %}" alt="Bitácora" class="navbar-btn-icon">
+                        <span>Bitácora</span>
+                        {% if mascotas_usuario|length > 1 %}
+                        <span class="navbar-chevron">▼</span>
+                        {% endif %}
+                    </button>
+                    {% if mascotas_usuario|length > 1 %}
+                    <div class="navbar-dropdown-content">
+                        {% for mascota in mascotas_usuario %}
+                        <a href="{% url 'bitacora_mascota' mascota.id %}" class="navbar-dropdown-item">
+                            <div class="navbar-dropdown-avatar" style="overflow:hidden;">
+                                {% if mascota.foto %}
+                                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                {% elif mascota.especie == 'perro' %}
+                                    <img src="{% static 'registro/icons/perro.svg' %}" alt="Perro" style="width:24px; height:24px; object-fit:contain;">
+                                {% else %}
+                                    <img src="{% static 'registro/icons/gato.svg' %}" alt="Gato" style="width:24px; height:24px; object-fit:contain;">
+                                {% endif %}
+                            </div>
+                            <div class="navbar-dropdown-info">
+                                <div class="navbar-dropdown-name">{{ mascota.nombre }}</div>
+                                <div class="navbar-dropdown-desc">{{ mascota.get_especie_display }} - {{ mascota.raza|default:"Sin información" }}</div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="navbar-dropdown" id="navbar-dropdown-mascotas">
+                    <button type="button" class="navbar-btn" onclick="{% if mascotas_usuario|length > 1 %}toggleDropdown('navbar-dropdown-mascotas'){% else %}window.location.href='{% url 'perfil_mascota' mascotas_usuario.0.id %}'{% endif %}">
+                        <img src="{% static 'registro/icons/mascota.svg' %}" alt="Mascota" class="navbar-btn-icon">
+                        <span>Perfil Mascota</span>
+                        {% if mascotas_usuario|length > 1 %}
+                        <span class="navbar-chevron">▼</span>
+                        {% endif %}
+                    </button>
+                    {% if mascotas_usuario|length > 1 %}
+                    <div class="navbar-dropdown-content">
+                        {% for mascota in mascotas_usuario %}
+                        <a href="{% url 'perfil_mascota' mascota.id %}" class="navbar-dropdown-item">
+                            <div class="navbar-dropdown-avatar" style="overflow:hidden;">
+                                {% if mascota.foto %}
+                                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                {% elif mascota.especie == 'perro' %}
+                                    <img src="{% static 'registro/icons/perro.svg' %}" alt="Perro" style="width:24px; height:24px; object-fit:contain;">
+                                {% else %}
+                                    <img src="{% static 'registro/icons/gato.svg' %}" alt="Gato" style="width:24px; height:24px; object-fit:contain;">
+                                {% endif %}
+                            </div>
+                            <div class="navbar-dropdown-info">
+                                <div class="navbar-dropdown-name">{{ mascota.nombre }}</div>
+                                <div class="navbar-dropdown-desc">{{ mascota.get_especie_display }} - {{ mascota.raza|default:"Sin información" }}</div>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <form method="post" action="{% url 'logout' %}" style="margin:0; display:inline-block;">
+                    {% csrf_token %}
+                    <button type="submit" class="navbar-btn navbar-btn-primary">
+                        <img src="{% static 'registro/icons/cerrar-sesion.svg' %}" alt="Cerrar sesión" class="navbar-btn-icon navbar-btn-icon-white">
+                        <span>Cerrar Sesión</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </nav>
+    {% endif %}
+    
+    {% if messages %}
+        <div class="fixed top-16 right-4 space-y-2 messages-container" id="messages-container" style="max-width: calc(100% - 2rem); z-index: 200;">
+            {% for message in messages %}
+                <div class="px-4 py-3 rounded-md shadow-lg message-alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}" style="word-wrap: break-word; {% if message.tags == 'success' %}background-color:#fcfceb; border:1px solid #d2de7d; color:#000000; display:flex; align-items:center; gap:0.75rem;{% elif message.tags == 'error' %}background-color:#fee; border:1px solid #fcc; color:#c00; display:flex; align-items:center; gap:0.75rem;{% else %}background-color:#e3f2fd; border:1px solid #90caf9; color:#1976d2; display:flex; align-items:center; gap:0.75rem;{% endif %}">
+                    {% if message.tags == 'success' %}
+                        <span style="color:#4caf50; font-size:1.25rem; font-weight:bold;">✓</span>
+                    {% elif message.tags == 'error' %}
+                        <span style="color:#f44336; font-size:1.25rem; font-weight:bold;">✗</span>
+                    {% else %}
+                        <span style="color:#2196f3; font-size:1.25rem; font-weight:bold;">ℹ</span>
+                    {% endif %}
+                    <span>{{ message }}</span>
+                </div>
+            {% endfor %}
+        </div>
+        <style>
+            .messages-container {
+                z-index: 200 !important;
+            }
+            @media (max-width: 768px) {
+                .messages-container {
+                    top: 60px;
+                    right: 1rem;
+                    left: 1rem;
+                    max-width: calc(100% - 2rem);
+                }
+                .message-alert {
+                    font-size: 0.85rem;
+                    padding: 0.75rem 1rem;
+                }
+            }
+            
+            @media (max-width: 480px) {
+                .messages-container {
+                    top: 60px;
+                    right: 0.5rem;
+                    left: 0.5rem;
+                    max-width: calc(100% - 1rem);
+                }
+                .message-alert {
+                    font-size: 0.8rem;
+                    padding: 0.6rem 0.9rem;
+                }
+            }
+        </style>
+    {% endif %}
+    
+    {% block content %}{% endblock %}
+    
+    {% block footer %}
+        {% include 'registro/footer.html' %}
+    {% endblock %}
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        function toggleDropdown(dropdownId) {
+            const dropdown = document.getElementById(dropdownId);
+            if (dropdown) {
+                dropdown.classList.toggle('active');
+            }
+        }
+        
+        // Cerrar dropdown al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            const dropdowns = document.querySelectorAll('.navbar-dropdown');
+            dropdowns.forEach(function(dropdown) {
+                if (!dropdown.contains(event.target)) {
+                    dropdown.classList.remove('active');
+                }
+            });
+        });
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const messages = document.querySelectorAll('.message-alert');
+            messages.forEach(function(message) {
+                setTimeout(function() {
+                    message.style.transition = 'opacity 0.5s';
+                    message.style.opacity = '0';
+                    setTimeout(function() {
+                        message.remove();
+                    }, 500);
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>
+

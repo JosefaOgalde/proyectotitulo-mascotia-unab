@@ -1,0 +1,1691 @@
+{% extends 'registro/base.html' %}
+{% load registro_extras %}
+{% load static %}
+
+{% block title %}Panel de Control - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-header {
+        background-color: #3d9eb3;
+        color: #000000;
+    }
+    
+    .dashboard-header-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2.5rem 24px;
+    }
+    
+    .dashboard-header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+        margin-left: auto;
+    }
+    
+    .dashboard-header-actions > div {
+        white-space: nowrap;
+        flex-shrink: 0;
+        padding: 0.5rem 1rem;
+    }
+    
+    .dashboard-header-actions form {
+        margin: 0;
+        flex-shrink: 0;
+        display: inline-block;
+    }
+    
+    .dashboard-header-actions button {
+        white-space: nowrap;
+        width: auto;
+        flex-shrink: 0;
+        padding: 0.5rem 1rem;
+        font-size: inherit;
+        font-family: inherit;
+    }
+    
+    .dashboard-main {
+        padding: 2rem 0;
+    }
+    
+    .dashboard-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: grid;
+        gap: 2rem;
+    }
+    
+    .section-card {
+        border-radius: 1.5rem;
+        padding: 2rem 2.5rem;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        color: #000000;
+    }
+    
+    .mascota-card {
+        border-radius: 1rem;
+        overflow: hidden;
+        border: 1px solid #e0e0e0;
+        background-color: #ffffff;
+        transition: all 0.3s ease;
+    }
+    
+    .mascota-card-toggle {
+        transition: background-color 0.2s ease;
+    }
+    
+    .mascota-card-toggle:hover {
+        background-color: #e0e0e0;
+        opacity: 0.9;
+    }
+    
+    .mascota-card-content {
+        display: none;
+        grid-template-columns: 1fr;
+        overflow: hidden;
+    }
+    
+    .mascota-card-content.show {
+        display: grid !important;
+        animation: slideDown 0.3s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .toggle-icon {
+        transition: transform 0.3s ease;
+    }
+    
+    .toggle-icon.rotated {
+        transform: rotate(180deg);
+    }
+    
+    .mascota-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 0.75rem;
+    }
+    
+    .calendar-grid {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: 0.25rem;
+        text-align: center;
+        color: #fdf5e0;
+    }
+    
+    @media (max-width: 1024px) {
+        .dashboard-header-content {
+            padding: 2rem 1rem;
+        }
+        
+        .dashboard-header-content h1 {
+            font-size: 2rem !important;
+        }
+        
+        .dashboard-content {
+            max-width: 100%;
+            padding: 0 1rem;
+        }
+        
+        .section-card {
+            padding: 1.5rem 2rem;
+        }
+        
+        .section-card > div[style*="grid-template-columns: repeat(3"] {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header-content {
+            padding: 1.5rem 1rem;
+        }
+        
+        .dashboard-header-content h1 {
+            font-size: 1.75rem !important;
+            line-height: 1.3 !important;
+        }
+        
+        .dashboard-header-content p {
+            font-size: 0.9rem !important;
+        }
+        
+        .dashboard-main {
+            padding: 1.5rem 0;
+        }
+        
+        .dashboard-content {
+            padding: 0 0.75rem;
+            gap: 1.5rem;
+        }
+        
+        .section-card {
+            padding: 1.25rem 1.5rem;
+            border-radius: 1.25rem;
+        }
+        
+        .section-card h2 {
+            font-size: 1.5rem !important;
+        }
+        
+        .mascota-stats {
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.5rem;
+        }
+        
+    .mascota-card button {
+        padding: 0.75rem 1rem !important;
+    }
+    
+    .btn-agregar-evento:hover {
+        background-color: #c0cc5d !important;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3) !important;
+    }
+    
+    .btn-agregar-evento:active {
+        transform: translateY(0);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.25) !important;
+    }
+        
+        .mascota-card > div[id^="mascota-"] {
+            padding: 1.25rem 1rem !important;
+        }
+        
+        .calendar-grid {
+            gap: 0.2rem;
+        }
+        
+        .calendar-grid > div {
+            font-size: 0.7rem;
+            padding: 0.35rem 0.2rem;
+            min-height: 1.5rem;
+        }
+        
+        .section-card > div:first-child {
+            flex-direction: column;
+            align-items: flex-start !important;
+        }
+        
+        .section-card > div:first-child > div:last-child {
+            text-align: left !important;
+            margin-top: 0.5rem;
+            width: 100%;
+        }
+        
+        .dashboard-header-content > div {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .dashboard-header-actions {
+            margin-top: 1rem;
+            justify-content: flex-start;
+            width: 100%;
+            margin-left: 0;
+        }
+        
+        .section-card > div[style*="grid-template-columns: repeat(3"] {
+            grid-template-columns: 1fr !important;
+        }
+    }
+    
+    /* Estilos para campos del formulario en el modal */
+    #modal-eventos-backdrop input[type="text"],
+    #modal-eventos-backdrop input[type="date"],
+    #modal-eventos-backdrop input[type="time"],
+    #modal-eventos-backdrop select,
+    #modal-eventos-backdrop textarea {
+        width: 100%;
+        padding: 0.4rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.25rem;
+        font-size: 0.55rem;
+        background-color: #ffffff;
+        color: #000000;
+        font-family: inherit;
+        box-sizing: border-box;
+    }
+    
+    #modal-eventos-backdrop input[type="text"]:focus,
+    #modal-eventos-backdrop input[type="date"]:focus,
+    #modal-eventos-backdrop input[type="time"]:focus,
+    #modal-eventos-backdrop select:focus,
+    #modal-eventos-backdrop textarea:focus {
+        outline: none;
+        border-color: #3d9eb3;
+        box-shadow: 0 0 0 2px rgba(61, 158, 179, 0.1);
+    }
+    
+    #modal-eventos-backdrop textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    #modal-eventos-backdrop select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23666' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 0.4rem center;
+        padding-right: 2rem;
+    }
+    
+    #modal-eventos-backdrop input::placeholder,
+    #modal-eventos-backdrop textarea::placeholder {
+        color: #999;
+        opacity: 0.7;
+    }
+    
+    /* Estilos responsivos para el calendario */
+    @media (max-width: 1024px) {
+        #calendario {
+            max-width: 100%;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        #calendario {
+            padding: 0.6rem !important;
+        }
+        
+        #calendario .btn-agregar-evento-semana {
+            padding: 0.25rem 0.5rem !important;
+            font-size: 0.5rem !important;
+        }
+        
+        #calendario .dia-calendario {
+            padding: 0.3rem 0.2rem !important;
+            min-height: 2rem !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .dashboard-header-content {
+            padding: 1.25rem 0.75rem;
+        }
+        
+        .dashboard-header-content h1 {
+            font-size: 1.5rem !important;
+            line-height: 1.3 !important;
+        }
+        
+        .dashboard-header-content p {
+            font-size: 0.85rem !important;
+        }
+        
+        .dashboard-header-content span {
+            font-size: 0.7rem !important;
+            padding: 0.2rem 0.6rem !important;
+        }
+        
+        .dashboard-header-content > div {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 0.75rem !important;
+        }
+        
+        .dashboard-header-actions {
+            margin-top: 0.75rem !important;
+            width: auto !important;
+            flex-direction: row !important;
+            justify-content: flex-start !important;
+            gap: 0.5rem !important;
+            margin-left: 0 !important;
+            align-self: flex-start !important;
+        }
+        
+        .dashboard-header-actions > div {
+            padding: 0.45rem 0.9rem !important;
+            font-size: 0.9rem !important;
+        }
+        
+        .dashboard-header-actions form {
+            display: inline-block !important;
+        }
+        
+        .dashboard-header-actions button {
+            padding: 0.45rem 0.9rem !important;
+            font-size: 0.9rem !important;
+            width: auto !important;
+            flex: 0 0 auto !important;
+        }
+        
+        .dashboard-main {
+            padding: 1rem 0;
+        }
+        
+        .dashboard-content {
+            padding: 0 0.5rem;
+            gap: 1.25rem;
+        }
+        
+        .section-card {
+            padding: 1rem 1.25rem;
+            border-radius: 1rem;
+        }
+        
+        .section-card h2 {
+            font-size: 1.25rem !important;
+        }
+        
+        .section-card p {
+            font-size: 0.85rem !important;
+        }
+        
+        .mascota-stats {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+        }
+        
+        .mascota-stats > div {
+            padding: 0.75rem !important;
+        }
+        
+        .mascota-stats > div > p:first-child {
+            font-size: 0.55rem !important;
+        }
+        
+        .mascota-stats > div > p:nth-child(2) {
+            font-size: 1rem !important;
+        }
+        
+        .mascota-stats > div > p:last-child {
+            font-size: 0.7rem !important;
+        }
+        
+        .section-card > div:first-child > div:last-child {
+            text-align: left !important;
+            margin-top: 0.75rem !important;
+            width: 100% !important;
+        }
+        
+        .calendar-grid > div {
+            font-size: 0.65rem;
+            padding: 0.3rem 0.15rem;
+            min-height: 1.4rem;
+        }
+        
+        .mascota-card button {
+            padding: 0.75rem 0.75rem !important;
+        }
+        
+        .mascota-card > div[id^="mascota-"] {
+            padding: 1rem 0.75rem !important;
+        }
+        
+        .mascota-card > div[id^="mascota-"] > div:last-child {
+            width: 100% !important;
+        }
+        
+        .mascota-card button > div > div:first-child {
+            width: 2.5rem !important;
+            height: 2.5rem !important;
+            font-size: 1.5rem !important;
+        }
+        
+        .mascota-card button > div > div:last-child p:first-child {
+            font-size: 1.15rem !important;
+        }
+        
+        .mascota-card button > div > div:last-child p:last-child {
+            font-size: 0.85rem !important;
+        }
+        
+        .mascota-card > div[id^="mascota-"] > div:last-child > div:last-child {
+            width: 100% !important;
+        }
+        
+        .mascota-card > div[id^="mascota-"] > div:last-child > div:last-child a {
+            font-size: 0.8rem !important;
+            padding: 0.6rem 1rem !important;
+            white-space: normal !important;
+            word-break: break-word;
+            text-align: center;
+            width: 100% !important;
+            flex-wrap: wrap;
+        }
+        
+        .mascota-card > div[id^="mascota-"] > div:last-child > div:last-child a > span {
+            flex-shrink: 0;
+        }
+        
+        .mascota-card > div[id^="mascota-"] > div:last-child > div:last-child a > span:last-child {
+            word-break: break-word;
+            text-align: center;
+            flex: 1;
+            min-width: 0;
+        }
+    }
+    
+    @media (min-width: 481px) and (max-width: 768px) {
+        .mascota-card > div[id^="mascota-"] > div:last-child > div:last-child a {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+    }
+    
+    /* Estilos del Footer */
+    .site-footer {
+        background-color: #f0f9fa;
+        padding: 48px 0 24px;
+        border-top: 1px solid #d0e8eb;
+        margin-top: 3rem;
+    }
+    
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 24px;
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1.2fr 1.6fr;
+        gap: 32px;
+        font-size: 13px;
+        color: #555555;
+    }
+    
+    .footer-title {
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #00a9b4;
+        font-size: 14px;
+    }
+    
+    .footer-brand-title {
+        font-weight: 800;
+        color: #00a9b4;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    
+    .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .footer-list li {
+        margin-bottom: 8px;
+    }
+    
+    .footer-list a {
+        color: #555555;
+        transition: color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .footer-list a:hover {
+        color: #00a9b4;
+    }
+    
+    .footer-contact-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: #555555;
+    }
+    
+    .footer-contact-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #00a9b4;
+        color: #ffffff;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .footer-contact-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .footer-contact-icon-img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+    
+    .footer-bottom {
+        border-top: 1px solid #d0e8eb;
+        margin-top: 16px;
+        padding-top: 24px;
+    }
+    
+    .footer-bottom-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #666666;
+    }
+    
+    .footer-socials {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #00a9b4;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .social-icon:hover {
+        background-color: #008491;
+    }
+    
+    .social-icon.instagram {
+        background-color: #00a9b4;
+    }
+    
+    .social-icon.instagram:hover {
+        background-color: #008491;
+    }
+    
+    @media (max-width: 768px) {
+        .footer-inner {
+            grid-template-columns: 1fr 1fr;
+            row-gap: 32px;
+        }
+        
+        .footer-bottom-inner {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .footer-inner {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="min-h-screen" style="background-color:#ffffff;">
+
+    <!-- Banner azul con bienvenida -->
+    <div style="background-color:#3d9eb3; padding:1.5rem 0;">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+            <div style="display:flex; align-items:center; gap:0.85rem;">
+                <form id="form-foto-perfil-banner" method="post" action="{% url 'actualizar_foto_perfil_banner' %}" enctype="multipart/form-data" style="margin:0; display:inline-block;">
+                    {% csrf_token %}
+                    <input type="file" id="input-foto-perfil-banner" name="foto_perfil" accept="image/*" style="display:none;" onchange="document.getElementById('form-foto-perfil-banner').submit();">
+                    {% if foto_perfil_url %}
+                        <div id="foto-perfil-container" style="width:160px; height:160px; border-radius:50%; background-color:#ffffff; border:3px solid #ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer; position:relative; transition:all 0.2s;" onclick="document.getElementById('input-foto-perfil-banner').click();" onmouseover="document.getElementById('icono-editar-perfil').style.opacity='1';" onmouseout="document.getElementById('icono-editar-perfil').style.opacity='0';" title="Haz clic para cambiar tu foto de perfil">
+                            <img src="{{ foto_perfil_url }}" alt="{{ user_name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;">
+                            <div id="icono-editar-perfil" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div id="foto-perfil-container" style="width:160px; height:160px; border-radius:50%; background-color:transparent; border:3px solid #ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer; position:relative; transition:all 0.2s;" onclick="document.getElementById('input-foto-perfil-banner').click();" onmouseover="document.getElementById('icono-editar-perfil-vacio').style.opacity='1';" onmouseout="document.getElementById('icono-editar-perfil-vacio').style.opacity='0';" title="Haz clic para agregar tu foto de perfil">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#ffffff"/>
+                            </svg>
+                            <div id="icono-editar-perfil-vacio" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+                        <div>
+                    <p style="color:#ffffff; font-size:1rem; margin:0 0 0.25rem; opacity:0.9;">Bienvenida de vuelta,</p>
+                    <h1 style="color:#ffffff; font-size:1.5rem; font-weight:700; margin:0; line-height:1.2;">Hola {{ user_name }}</h1>
+                        </div>
+                    </div>
+            <div style="text-align:right;">
+                <h2 style="color:#ffffff; font-size:1.5rem; font-weight:700; margin:0; line-height:1.2;">Panel de Control</h2>
+                <p style="color:#ffffff; font-size:1rem; margin:0.3rem 0 0; opacity:0.9;">Gestiona la información y el bienestar de tus mascotas</p>
+                </div>
+                </div>
+            </div>
+
+    <main style="padding:0.85rem 0; background-color:#f5f5f5;">
+        {% csrf_token %}
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px; display:grid; gap:0.85rem;">
+            <!-- Sección de Mascotas -->
+            <section style="background-color:#ffffff; border-radius:0.7rem; padding:0.85rem; border:1px solid #e0e0e0;">
+                <div style="display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:0.35rem; margin-bottom:0.85rem;">
+                    <div style="display:flex; align-items:center; gap:0.35rem;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#3d9eb3"/>
+                        </svg>
+                        <h2 style="font-size:1.25rem; font-weight:600; color:#000000; margin:0;">Mis Mascotas ({{ stats.mascotas_total }} activa{{ stats.mascotas_total|pluralize }})</h2>
+                    </div>
+                    <div style="display:flex; gap:0.35rem; flex-wrap:wrap;">
+                        <a href="{% url 'registro_mascota' %}?from=home" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1.25rem; border-radius:0.35rem; background-color:#3d9eb3; color:#ffffff; border:none; font-weight:600; text-decoration:none; font-size:0.85rem; cursor:pointer; white-space:nowrap;">
+                            <span style="color:#ffffff;">+</span>
+                            <span>Agregar</span>
+                        </a>
+                        <button type="button" id="btn-desactivar" style="display:inline-flex; align-items:center; gap:0.5rem; padding:0.5rem 1.25rem; border-radius:0.35rem; background-color:#e0e0e0; color:#333333; border:none; font-weight:600; font-size:0.85rem; cursor:pointer; white-space:nowrap; font-family:inherit;">
+                            <span>−</span>
+                            <span>Desactivar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Mascotas Activas -->
+                <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 380px)); gap:0.7rem; margin-bottom:0.85rem; justify-content:start;">
+                    {% if mascotas %}
+                        {% for mascota in mascotas %}
+                        <div data-mascota-id="{{ mascota.id }}" style="background-color:#ffffff; border:1px solid #e0e0e0; border-radius:0.75rem; padding:1.75rem; display:flex; flex-direction:column; gap:0.75rem; max-width:380px; min-width:300px; min-height:380px; overflow:visible;">
+                            <div style="display:flex; align-items:center; gap:1rem;">
+                                <div style="width:5rem; height:5rem; border-radius:50%; background-color:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; border:2px solid #ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:0.3rem;">
+                                    {% if mascota.foto %}
+                                        <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                    {% elif mascota.especie_raw == 'perro' %}
+                                        <img src="{% static 'registro/icons/perro.svg' %}" alt="Perro" style="width:64px; height:64px; object-fit:contain;">
+                                    {% else %}
+                                        <img src="{% static 'registro/icons/gato.svg' %}" alt="Gato" style="width:64px; height:64px; object-fit:contain;">
+                                    {% endif %}
+                                </div>
+                                <div style="flex:1; min-width:0;">
+                                    <h3 style="font-size:1.5rem; font-weight:700; color:#000000; margin:0 0 0.25rem; line-height:1.2;">{{ mascota.nombre }}</h3>
+                                    <p style="font-size:1rem; color:#000000; margin:0; font-weight:500;">{{ mascota.raza }}</p>
+                                </div>
+                            </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem 0.75rem;">
+                                <span style="font-size:0.75rem; color:#666;">ID Mascota:</span>
+                                <strong style="font-size:0.75rem; color:#000000;">{{ mascota.microchip|default:"Sin información" }}</strong>
+                                <span style="font-size:0.75rem; color:#666;">Especie:</span>
+                                <strong style="font-size:0.75rem; color:#000000;">{{ mascota.get_especie_display }}</strong>
+                                <span style="font-size:0.75rem; color:#666;">Raza:</span>
+                                <strong style="font-size:0.75rem; color:#000000;">{{ mascota.raza|default:"Sin información" }}</strong>
+                                <span style="font-size:0.75rem; color:#666;">Edad:</span>
+                                <strong style="font-size:0.75rem; color:#000000;">{{ mascota.edad_display }}</strong>
+                                <span style="font-size:0.75rem; color:#666;">Género:</span>
+                                <strong style="font-size:0.75rem; color:#000000;">{{ mascota.get_sexo_display|default:"Sin información" }}</strong>
+                            </div>
+                            <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:auto; padding-top:0.5rem;">
+                                <a href="{% url 'bitacora_mascota' mascota.id %}" style="display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.5rem 1.25rem; border-radius:0.35rem; background-color:#1f5f6f; color:#ffffff; border:none; font-weight:600; text-decoration:none; font-size:0.85rem; cursor:pointer; width:100%; box-sizing:border-box;">
+                                    <img src="{% static 'registro/icons/bitacora.svg' %}" alt="Bitácora" style="width:24px; height:24px; flex-shrink:0; filter: brightness(0) invert(1);">
+                                    <span>Bitácora de salud {{ mascota.nombre }}</span>
+                                </a>
+                                <a href="{% url 'perfil_mascota' mascota.id %}" style="display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.5rem 1.25rem; border-radius:0.35rem; background-color:#f5f5f5; color:#666666; border:1px solid #e0e0e0; font-weight:600; text-decoration:none; font-size:0.85rem; cursor:pointer; width:100%; box-sizing:border-box;">
+                                    <img src="{% static 'registro/icons/mascota.svg' %}" alt="Mascota" style="width:24px; height:24px; flex-shrink:0; filter: brightness(0) saturate(100%) invert(38%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0.4);">
+                                    <span>Perfil {{ mascota.nombre }}</span>
+                                </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <p style="font-size:0.9rem; color:#000000; opacity:0.8; margin:0; grid-column:1/-1;">Añade tus mascotas para ver su información en este panel.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Mascotas Desactivadas - Desplegable -->
+                {% if mascotas_inactivas %}
+                <div style="margin-top:1.25rem; padding-top:1.25rem; border-top:1px solid #e0e0e0;">
+                    <button type="button" id="toggle-mascotas-desactivadas" style="width:100%; background:none; border:none; padding:0; cursor:pointer; display:flex; align-items:center; justify-content:space-between;">
+                        <h3 style="font-size:0.9rem; font-weight:600; color:#000000; margin:0;">Mascotas Desactivadas ({{ mascotas_inactivas|length }})</h3>
+                        <span id="chevron-desactivadas" style="font-size:0.9rem; color:#666; transition:transform 0.3s;">▼</span>
+                    </button>
+                    <div id="mascotas-desactivadas-content" style="display:none; margin-top:1rem;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 380px)); gap:0.7rem; justify-content:start;">
+                        {% for mascota in mascotas_inactivas %}
+                            <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.75rem; padding:1.25rem; display:flex; flex-direction:column; gap:0.75rem; position:relative; opacity:0.8; max-width:380px; min-width:300px; min-height:380px; overflow:visible;">
+                                <div style="position:absolute; top:0.75rem; right:0.75rem;">
+                                    <span style="background-color:#c0c0c0; color:#ffffff; padding:0.25rem 0.6rem; border-radius:9999px; font-size:0.8rem; font-weight:600;">Desactivada</span>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:1rem;">
+                                    <div style="width:5rem; height:5rem; border-radius:50%; background-color:#c0c0c0; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; border:2px solid #ffffff; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:0.3rem;">
+                                {% if mascota.foto %}
+                                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%;">
+                                {% elif mascota.especie_raw == 'perro' %}
+                                    <img src="{% static 'registro/icons/perro.svg' %}" alt="Perro" style="width:64px; height:64px; object-fit:contain;">
+                                {% else %}
+                                    <img src="{% static 'registro/icons/gato.svg' %}" alt="Gato" style="width:64px; height:64px; object-fit:contain;">
+                                {% endif %}
+                            </div>
+                                    <div style="flex:1; min-width:0;">
+                                        <h3 style="font-size:1.5rem; font-weight:700; color:#000000; margin:0 0 0.25rem; line-height:1.2;">{{ mascota.nombre }}</h3>
+                                        <p style="font-size:1rem; color:#000000; margin:0; font-weight:500;">{{ mascota.raza }}</p>
+                                    </div>
+                                </div>
+                                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem 0.75rem;">
+                                    <span style="font-size:0.75rem; color:#666;">ID Mascota:</span>
+                                    <strong style="font-size:0.75rem; color:#000000;">{{ mascota.microchip }}</strong>
+                                    <span style="font-size:0.75rem; color:#666;">Fecha de Nacimiento:</span>
+                                    <strong style="font-size:0.75rem; color:#000000;">{{ mascota.fecha_nacimiento_display }}</strong>
+                                    <span style="font-size:0.75rem; color:#666;">Edad:</span>
+                                    <strong style="font-size:0.75rem; color:#000000;">{{ mascota.edad_display }}</strong>
+                                    <span style="font-size:0.75rem; color:#666;">Color de Pelaje:</span>
+                                    <strong style="font-size:0.75rem; color:#000000;">{{ mascota.color_pelaje }}</strong>
+                                    <span style="font-size:0.75rem; color:#666;">Alergias:</span>
+                                    <strong style="font-size:0.75rem; color:#000000;">No manifiesta</strong>
+                                </div>
+                                <div style="display:flex; flex-direction:column; gap:0.5rem; margin-top:auto; padding-top:0.5rem;">
+                                    <a href="{% url 'bitacora_mascota' mascota.id %}" style="display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.5rem 1.25rem; border-radius:0.35rem; background-color:#8a8a8a; color:#ffffff; border:none; font-weight:600; text-decoration:none; font-size:0.85rem; cursor:pointer; width:100%; box-sizing:border-box;">
+                                        <img src="{% static 'registro/icons/bitacora.svg' %}" alt="Bitácora" style="width:24px; height:24px; flex-shrink:0; filter: brightness(0) invert(1);">
+                                        <span>Bitácora de salud {{ mascota.nombre }}</span>
+                                    </a>
+                                    <a href="{% url 'perfil_mascota' mascota.id %}" style="display:inline-flex; align-items:center; justify-content:center; gap:0.5rem; padding:0.5rem 1.25rem; border-radius:0.35rem; background-color:#f5f5f5; color:#666666; border:1px solid #e0e0e0; font-weight:600; text-decoration:none; font-size:0.85rem; cursor:pointer; width:100%; box-sizing:border-box;">
+                                        <img src="{% static 'registro/icons/mascota.svg' %}" alt="Mascota" style="width:24px; height:24px; flex-shrink:0; filter: brightness(0) saturate(100%) invert(38%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0.4);">
+                                        <span>Perfil {{ mascota.nombre }}</span>
+                                    </a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </section>
+            
+            {% if mostrar_popup %}
+            <div id="popup-mascota-home" style="position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1000; padding:0.7rem;">
+                <div style="background-color:#ffffff; border-radius:0.7rem; padding:1.5rem; max-width:400px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+                    <div style="text-align:center; margin-bottom:0.85rem;">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="margin-bottom:0.75rem;">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#3d9eb3"/>
+                        </svg>
+                        <h2 style="font-size:0.95rem; font-weight:700; color:#000000; margin:0 0 0.375rem;">¡Mascota registrada!</h2>
+                        <p style="color:#666; margin:0; font-size:0.6rem;">{{ mascota_guardada }} ha sido agregada exitosamente a tu bitácora.</p>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.35rem;">
+                        <a href="{% url 'registro_mascota' %}?from=home" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem; padding:0.6rem 1.25rem; border-radius:0.35rem; background-color:#3d9eb3; color:#ffffff; border:none; font-weight:600; text-decoration:none; font-size:0.6rem; cursor:pointer;">
+                            <span>+</span>
+                            <span>Agregar una nueva mascota</span>
+                        </a>
+                        <button onclick="document.getElementById('popup-mascota-home').style.display='none'" style="display:inline-flex; align-items:center; justify-content:center; gap:0.375rem; padding:0.6rem 1.25rem; border-radius:0.35rem; background-color:#e0e0e0; color:#333333; border:none; font-weight:600; font-size:0.6rem; cursor:pointer;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#333"/>
+                            </svg>
+                            <span>Cerrar</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Sección de Recordatorios / Calendario -->
+            <section id="calendario" data-mes-actual="{{ fecha_calendario.month }}" data-anio-actual="{{ fecha_calendario.year }}" style="background-color:#ffffff; border-radius:0.7rem; padding:1.2rem; border:1px solid #e0e0e0; position:relative; max-width:100%;">
+                <div style="margin-bottom:1rem; position:relative;">
+                    <p style="font-size:0.85rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; margin:0 0 0.5rem; color:#3d9eb3;">PRÓXIMAS CITAS</p>
+                    <h2 style="font-size:1.25rem; font-weight:700; color:#000000; margin:0 0 0.5rem;">Recordatorios importantes</h2>
+                    {% if total_eventos_mes > 0 %}
+                    <p style="font-size:0.9rem; color:#666; margin:0;">Tienes {{ total_eventos_mes }} evento{{ total_eventos_mes|pluralize }} registrado{{ total_eventos_mes|pluralize }}. Expande las semanas para ver los detalles.</p>
+                    {% else %}
+                    <p style="font-size:0.9rem; color:#666; margin:0;">No hay citas registradas. <span style="color:#3d9eb3; cursor:pointer;" onclick="abrirModalEventos();">Añade tus próximas visitas al veterinario para verlas aquí.</span></p>
+                    {% endif %}
+                    <button type="button" onclick="abrirModalEventos();" style="position:absolute; top:0; right:0; background-color:#3d9eb3; color:#ffffff; border:none; border-radius:0.35rem; padding:0.75rem 1.25rem; font-weight:600; font-size:0.9rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem;">
+                        <img src="{% static 'registro/icons/calendario.svg' %}" alt="Calendario" style="width:20px; height:20px; flex-shrink:0; filter: brightness(0) invert(1);">
+                        <span>Agregar evento</span>
+                    </button>
+                    </div>
+                
+                <!-- Calendario -->
+                <div style="background-color:#3d9eb3; border-radius:0.75rem; padding:0; overflow:hidden;">
+                    <!-- Navegación de mes -->
+                    <div style="background-color:#3d9eb3; padding:0.75rem 1rem; display:flex; align-items:center; justify-content:space-between;">
+                        <button type="button" id="btn-mes-anterior" style="background-color:rgba(255,255,255,0.2); border:1px solid #ffffff; border-radius:0.375rem; color:#ffffff; font-size:2.5rem; font-weight:700; cursor:pointer; padding:0.25rem 0.75rem; min-width:45px; width:45px; height:45px; display:flex; align-items:center; justify-content:center; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.2)'">‹</button>
+                        <h3 id="mes-actual" style="color:#ffffff; font-size:1.1rem; font-weight:700; margin:0; text-transform:capitalize; white-space:nowrap;">{{ current_month }}</h3>
+                        <button type="button" id="btn-mes-siguiente" style="background-color:rgba(255,255,255,0.2); border:1px solid #ffffff; border-radius:0.375rem; color:#ffffff; font-size:2.5rem; font-weight:700; cursor:pointer; padding:0.25rem 0.75rem; min-width:45px; width:45px; height:45px; display:flex; align-items:center; justify-content:center; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.3)'" onmouseout="this.style.backgroundColor='rgba(255,255,255,0.2)'">›</button>
+                    </div>
+                    
+                    <!-- Semanas del mes -->
+                    <div style="padding:0.5rem; display:flex; flex-direction:column; gap:0.5rem;">
+                        {% for par in weeks_paired %}
+                        {% with semana=par.0 meta=par.1 semana_idx=forloop.counter0 %}
+                        <div style="background-color:#ffffff; border-radius:0.35rem; border:1px solid #e0e0e0; overflow:hidden;">
+                            <button type="button" class="btn-accordion-semana" data-target="semana-{{ forloop.counter }}" style="width:100%; text-align:left; background:none; border:none; padding:1rem 1.25rem; display:flex; align-items:center; gap:0.75rem; cursor:pointer;">
+                                <img src="{% static 'registro/icons/calendario.svg' %}" alt="Calendario" style="width:20px; height:20px; flex-shrink:0; filter: brightness(0) saturate(100%) invert(48%) sepia(90%) saturate(1000%) hue-rotate(150deg) brightness(0.8);">
+                                <strong style="color:#000000; font-size:0.95rem; font-weight:700;">Semana {{ meta.index }}</strong>
+                                <span style="color:#666; font-size:0.85rem;">{{ meta.inicio }} - {{ meta.fin }}</span>
+                                <span style="margin-left:auto; color:#666; font-size:0.9rem;" class="chevron-semana-{{ forloop.counter }}">▼</span>
+                            </button>
+                            <div id="semana-{{ forloop.counter }}" class="accordion-body-semana" style="display:none; border-top:1px solid #e0e0e0; padding:0.5rem; position:relative;">
+                                <div style="position:relative; padding-top:2.5rem;">
+                                    <button type="button" class="btn-agregar-evento-semana" data-semana="{{ forloop.counter }}" style="position:absolute; top:0; right:0; background-color:#3d9eb3; color:#ffffff; border:none; border-radius:0.25rem; padding:0.5rem 1rem; font-weight:600; font-size:0.85rem; cursor:pointer; display:flex; align-items:center; gap:0.5rem; z-index:10;">
+                                        <span>Agregar</span>
+                                    </button>
+                                    <div style="display:grid; grid-template-columns:repeat(7, minmax(0, 1fr)); gap:0.5rem; max-width:100%; justify-items:center;">
+                                    {% for numero in semana %}
+                                        <div class="dia-calendario" data-dia-numero="{{ numero }}" data-mes-calendario="{{ fecha_calendario.month }}" data-anio-calendario="{{ fecha_calendario.year }}" style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.375rem; padding:0.4rem 0.5rem; text-align:center; width:100%; aspect-ratio:1.5; min-height:3.5rem; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; cursor:pointer; transition:background-color 0.2s;" onmouseover="this.style.backgroundColor='#e8f4f6'" onmouseout="this.style.backgroundColor='#f5f5f5'">
+                                        {% if numero %}
+                                            <span style="font-size:0.7rem; color:#666; margin-bottom:0.15rem;">
+                                                {% if forloop.counter == 1 %}Dom{% elif forloop.counter == 2 %}Lun{% elif forloop.counter == 3 %}Mar{% elif forloop.counter == 4 %}Mié{% elif forloop.counter == 5 %}Jue{% elif forloop.counter == 6 %}Vie{% elif forloop.counter == 7 %}Sáb{% endif %}
+                                            </span>
+                                            <span style="font-size:1rem; font-weight:700; color:#3d9eb3;">{{ numero }}</span>
+                                            {% with eventos_del_dia=eventos_por_dia|get_item:numero %}
+                                            {% if eventos_del_dia %}
+                                            <div style="display:flex; flex-direction:column; gap:0.25rem; margin-top:0.35rem; width:100%; align-items:center;">
+                                                {% for evento in eventos_del_dia %}
+                                                {% if evento.tipo == 'cita_general' or evento.tipo == 'cita_especialista' %}
+                                                <div style="display:flex; align-items:center; gap:0.3rem; padding:0.35rem 0.5rem; border-radius:0.25rem; font-size:0.65rem; font-weight:600; width:100%; justify-content:center; background-color:#3d9eb3; color:#ffffff;">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/>
+                                                    </svg>
+                                                    <span>{% if evento.hora %}{{ evento.hora }}{% else %}--:--{% endif %}</span>
+                                                </div>
+                                                {% elif evento.tipo == 'medicacion' or evento.tipo == 'vacuna' %}
+                                                <div style="display:flex; align-items:center; gap:0.3rem; padding:0.35rem 0.5rem; border-radius:0.25rem; font-size:0.65rem; font-weight:600; width:100%; justify-content:center; background-color:#4caf50; color:#ffffff;">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#ffffff"/>
+                                                    </svg>
+                                                    <span>{% if evento.hora %}{{ evento.hora }}{% else %}--:--{% endif %}</span>
+                                                </div>
+                                                {% else %}
+                                                <div style="display:flex; align-items:center; gap:0.3rem; padding:0.35rem 0.5rem; border-radius:0.25rem; font-size:0.65rem; font-weight:600; width:100%; justify-content:center; background-color:#81c784; color:#ffffff;">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#ffffff"/>
+                                                    </svg>
+                                                    <span>{% if evento.hora %}{{ evento.hora }}{% else %}--:--{% endif %}</span>
+                                                </div>
+                                            {% endif %}
+                                            {% endfor %}
+                                        </div>
+                                        {% endif %}
+                                        {% endwith %}
+                                        {% endif %}
+                                    </div>
+                                    {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endwith %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+
+            <!-- Modal de Eventos -->
+            <div id="modal-eventos-backdrop" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:1rem;">
+                <div style="background:#ffffff; border-radius:0.7rem; max-width:600px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2); max-height:90vh; overflow-y:auto;">
+                    <!-- Header con ícono y título -->
+                    <div style="background-color:#3d9eb3; padding:1rem; border-radius:0.7rem 0.7rem 0 0; position:relative;">
+                    <div style="display:flex; align-items:center; gap:0.75rem;">
+                            <img src="{% static 'registro/icons/calendario.svg' %}" alt="Calendario" style="width:24px; height:24px; flex-shrink:0; filter: brightness(0) invert(1);">
+                            <div style="flex:1;">
+                                <h2 style="font-size:0.95rem; font-weight:700; color:#ffffff; margin:0;">Agregar evento a la bitácora</h2>
+                                <p style="font-size:0.6rem; color:#ffffff; margin:0.25rem 0 0; opacity:0.95;">Registra citas con el veterinario, medicaciones, curaciones, vacunas, desparasitaciones y comentarios.</p>
+                    </div>
+                            <button type="button" id="cerrar-modal-eventos" style="background:none; border:none; cursor:pointer; color:#ffffff; padding:0; width:28px; height:28px; display:flex; align-items:center; justify-content:center; border-radius:0.25rem; transition:background-color 0.2s; flex-shrink:0;" onmouseover="this.style.backgroundColor='rgba(255,255,255,0.2)'" onmouseout="this.style.backgroundColor='transparent'">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z" fill="#ffffff"/>
+                                </svg>
+                            </button>
+                </div>
+                    </div>
+                
+                    <!-- Contenido del formulario -->
+                    <div style="padding:1rem;">
+                        <form method="post" id="form-evento-calendario" style="display:grid; gap:0.75rem;">
+                    {% csrf_token %}
+                    <input type="hidden" name="guardar_evento_home" value="1" />
+                    
+                            <!-- Primera fila: Mascota y Fecha -->
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div>
+                                    <label for="mascota_id" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Mascota <span style="color:#3d9eb3;">*</span></label>
+                                    <select name="mascota_id" id="mascota_id" required style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem; background-color:#ffffff;">
+                                        <option value="">Selecciona</option>
+                                {% for mascota in mascotas %}
+                                <option value="{{ mascota.id }}">{{ mascota.nombre }} ({{ mascota.especie }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                                    <label for="id_fecha_evento" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Fecha Evento <span style="color:#3d9eb3;">*</span></label>
+                                    <input type="date" name="fecha_evento" id="id_fecha_evento" required class="form-control w-full" style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem;">
+                            {% if evento_form.fecha_evento.errors %}
+                                        <p style="color:#3d9eb3; font-size:0.5rem; margin-top:0.25rem;">{{ evento_form.fecha_evento.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                            </div>
+                            
+                            <!-- Segunda fila: Hora y Tipo de Evento -->
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                        <div>
+                                    <label for="{{ evento_form.hora_evento.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Hora</label>
+                                    <div style="position:relative; display:flex; align-items:center;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="position:absolute; left:0.4rem; color:#666; z-index:1;">
+                                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z" fill="#666"/>
+                                        </svg>
+                                        {{ evento_form.hora_evento }}
+                                    </div>
+                                    {% if evento_form.hora_evento.errors %}
+                                        <p style="color:#3d9eb3; font-size:0.5rem; margin-top:0.25rem;">{{ evento_form.hora_evento.errors.0 }}</p>
+                            {% endif %}
+                        </div>
+                        <div>
+                                    <label for="{{ evento_form.tipo_evento.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Tipo de Evento <span style="color:#3d9eb3;">*</span></label>
+                                    <select name="{{ evento_form.tipo_evento.name }}" id="{{ evento_form.tipo_evento.id_for_label }}" required style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem; background-color:#ffffff;">
+                                        <option value="">Selecciona</option>
+                                        {% for choice in evento_form.tipo_evento.field.choices %}
+                                        {% if choice.0 %}
+                                        <option value="{{ choice.0 }}" {% if evento_form.tipo_evento.value == choice.0 %}selected{% endif %}>{{ choice.1 }}</option>
+                                        {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    {% if evento_form.tipo_evento.errors %}
+                                        <p style="color:#3d9eb3; font-size:0.5rem; margin-top:0.25rem;">{{ evento_form.tipo_evento.errors.0 }}</p>
+                                    {% endif %}
+                        </div>
+                    </div>
+                    
+                            <!-- Veterinario -->
+                    <div>
+                                <label for="{{ evento_form.veterinario.id_for_label }}" style="display:block; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">Veterinario</label>
+                                <input type="text" name="{{ evento_form.veterinario.name }}" id="{{ evento_form.veterinario.id_for_label }}" value="{{ evento_form.veterinario.value|default:'' }}" placeholder="Nombre del ve" style="width:100%; padding:0.4rem; border:1px solid #e0e0e0; border-radius:0.25rem; font-size:0.55rem; background-color:#ffffff;">
+                    </div>
+                    
+                            <!-- Descripción -->
+                    <div>
+                                <label for="{{ evento_form.descripcion.id_for_label }}" style="display:flex; align-items:center; gap:0.375rem; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z" fill="#666"/>
+                                    </svg>
+                                    Descripción
+                                </label>
+                                {{ evento_form.descripcion }}
+                    </div>
+                    
+                            <!-- Medicación y Consideraciones lado a lado -->
+                            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; position:relative;">
+                                <div style="border-right:1px solid #e0e0e0; padding-right:0.75rem;">
+                                    <label for="{{ evento_form.medicacion.id_for_label }}" style="display:flex; align-items:center; gap:0.375rem; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M18 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm0 18H6V4h2v8l2.5-1.5L13 12V4h5v16z" fill="#666"/>
+                                        </svg>
+                                        Medicación (opcional)
+                                    </label>
+                                    {{ evento_form.medicacion }}
+                                </div>
+                                <div style="padding-left:0.75rem;">
+                                    <label for="{{ evento_form.consideraciones.id_for_label }}" style="display:flex; align-items:center; gap:0.375rem; font-size:0.55rem; font-weight:600; color:#000000; margin-bottom:0.25rem;">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#666"/>
+                                        </svg>
+                                        Consideraciones (opcional)
+                                    </label>
+                        {{ evento_form.consideraciones }}
+                                </div>
+                            </div>
+                            
+                            <!-- Recordatorios automáticos -->
+                            <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.35rem; padding:0.75rem;">
+                                <label style="display:flex; align-items:flex-start; gap:0.5rem; cursor:pointer;">
+                                    <input type="checkbox" name="activar_recordatorios" id="activar_recordatorios" style="width:18px; height:18px; margin-top:0.125rem; cursor:pointer; accent-color:#3d9eb3;">
+                                    <div style="flex:1;">
+                                        <strong style="display:block; font-size:0.6rem; font-weight:700; color:#000000; margin-bottom:0.25rem;">Activar recordatorios automáticos</strong>
+                                        <p style="font-size:0.55rem; color:#666; margin:0;">Ingresa fecha y hora para ver cuándo recibirás las alertas</p>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <!-- Tip -->
+                            <div style="background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.35rem; padding:0.75rem;">
+                                <div style="display:flex; align-items:flex-start; gap:0.5rem;">
+                                    <strong style="font-size:0.6rem; color:#000000;">Tip:</strong>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0; margin-top:0.125rem;">
+                                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="#666"/>
+                                    </svg>
+                                    <p style="font-size:0.55rem; color:#666; margin:0; flex:1;">Mantén un registro detallado de todos los eventos médicos de tu mascota. Esto te ayudará a tener un historial completo para futuras consultas veterinarias.</p>
+                                </div>
+                    </div>
+                    
+                    {% if evento_form.non_field_errors %}
+                                <div style="padding:0.35rem; background-color:#f0f0f0; border:1px solid #3d9eb3; border-radius:0.25rem;">
+                                    <p style="color:#3d9eb3; margin:0; font-size:0.55rem;">{{ evento_form.non_field_errors }}</p>
+                        </div>
+                    {% endif %}
+                    
+                            <!-- Botones -->
+                            <div style="display:flex; justify-content:flex-end; gap:0.5rem; margin-top:0.5rem; padding-top:0.75rem; border-top:1px solid #e0e0e0;">
+                                <button type="button" id="cancelar-modal-eventos" style="background-color:#e0e0e0; color:#333333; border:none; padding:0.4rem 1rem; border-radius:0.25rem; font-weight:600; cursor:pointer; font-size:0.55rem;">
+                                    Cancelar
+                                </button>
+                                <button type="submit" style="background-color:#3d9eb3; color:#ffffff; border:none; padding:0.4rem 1rem; border-radius:0.25rem; font-weight:600; cursor:pointer; font-size:0.55rem; display:flex; align-items:center; gap:0.375rem;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#ffffff"/>
+                                    </svg>
+                                    Agregar Evento
+                        </button>
+                    </div>
+                </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Modal de Éxito - Evento Agregado -->
+            {% if mostrar_popup_evento %}
+            <div id="modal-evento-exitoso" style="position:fixed; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:1100; padding:1rem;">
+                <div style="background-color:#ffffff; border-radius:0.7rem; padding:1.5rem; max-width:400px; width:100%; box-shadow:0 10px 40px rgba(0,0,0,0.2);">
+                    <div style="text-align:center; margin-bottom:1rem;">
+                        <!-- Ícono de éxito circular -->
+                        <div style="width:64px; height:64px; background-color:#81c784; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:0.75rem;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h2 style="font-size:1.1rem; font-weight:700; color:#000000; margin:0 0 0.5rem;">¡Evento Agregado!</h2>
+                        <p style="color:#666; margin:0 0 0.25rem; font-size:0.65rem;">
+                            El evento ha sido agregado exitosamente al calendario de <span style="color:#3d9eb3; font-weight:600;">{{ evento_mascota_nombre }}</span>
+                        </p>
+                        {% if evento_num_recordatorios > 0 %}
+                        <p style="color:#666; margin:0; font-size:0.65rem;">
+                            Se han programado {{ evento_num_recordatorios }} recordatorio{{ evento_num_recordatorios|pluralize }} automático{{ evento_num_recordatorios|pluralize }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.5rem;">
+                        <button type="button" onclick="cerrarModalEventoExitoso(); abrirModalEventos();" style="display:flex; align-items:center; justify-content:center; gap:0.375rem; padding:0.6rem 1.25rem; border-radius:0.35rem; background-color:#3d9eb3; color:#ffffff; border:none; font-weight:600; font-size:0.6rem; cursor:pointer;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                            </svg>
+                            <span>Agregar otro evento</span>
+                        </button>
+                        <button type="button" onclick="cerrarModalEventoExitoso(); window.scrollTo({top: 0, behavior: 'smooth'});" style="display:flex; align-items:center; justify-content:center; gap:0.375rem; padding:0.6rem 1.25rem; border-radius:0.35rem; background-color:#e0e0e0; color:#333333; border:none; font-weight:600; font-size:0.6rem; cursor:pointer;">
+                            <span>Ir al panel</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Sección de Blog -->
+            <section style="background-color:#ffffff; border-radius:0.7rem; padding:0.85rem; border:1px solid #e0e0e0;">
+                <div style="margin-bottom:0.85rem;">
+                    <h2 style="font-size:0.95rem; font-weight:600; color:#000000; margin:0 0 0.375rem;">Blog para Tutores</h2>
+                    <p style="font-size:0.55rem; color:#666; margin:0;">Mantente informado con los mejores consejos para el cuidado de tus mascotas</p>
+                </div>
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:0.7rem;">
+                    <!-- Blog Post 1 -->
+                    <div style="background-color:#ffffff; border-radius:0.75rem; overflow:hidden; border:1px solid #e0e0e0; display:flex; flex-direction:column;">
+                        <div style="width:100%; height:110px; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8 2 5 5 5 9c0 3 2 5 7 10 5-5 7-7 7-10 0-4-3-7-7-7zm0 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#666"/>
+                            </svg>
+                        </div>
+                        <div style="padding:0.7rem; display:flex; flex-direction:column; gap:0.35rem;">
+                            <p style="font-size:0.5rem; color:#3d9eb3; margin:0; font-weight:600;">15 Nov 2025</p>
+                            <h3 style="font-size:0.9rem; font-weight:700; color:#000000; margin:0;">Cuidados esenciales para gatos en invierno</h3>
+                            <p style="font-size:0.55rem; color:#666; margin:0; line-height:1.4;">Aprende cómo mantener a tu gato saludable durante los meses fríos del año.</p>
+                            <a href="#" style="color:#3d9eb3; font-size:0.55rem; font-weight:600; text-decoration:none; margin-top:0.375rem;">Leer más →</a>
+                        </div>
+                    </div>
+                    <!-- Blog Post 2 -->
+                    <div style="background-color:#ffffff; border-radius:0.75rem; overflow:hidden; border:1px solid #e0e0e0; display:flex; flex-direction:column;">
+                        <div style="width:100%; height:110px; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 2C7.9 2 7 2.9 7 4v1H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3V4c0-1.1-.9-2-2-2H9zm0 2h6v1H9V4zm-5 3h16v14H4V7zm8 2v6l4-3-4-3z" fill="#666"/>
+                            </svg>
+                        </div>
+                        <div style="padding:0.7rem; display:flex; flex-direction:column; gap:0.35rem;">
+                            <p style="font-size:0.5rem; color:#3d9eb3; margin:0; font-weight:600;">10 Nov 2025</p>
+                            <h3 style="font-size:0.9rem; font-weight:700; color:#000000; margin:0;">La importancia de las vacunas anuales</h3>
+                            <p style="font-size:0.55rem; color:#666; margin:0; line-height:1.4;">Descubre por qué es crucial mantener al día el calendario de vacunación de tu mascota.</p>
+                            <a href="#" style="color:#3d9eb3; font-size:0.55rem; font-weight:600; text-decoration:none; margin-top:0.375rem;">Leer más →</a>
+                        </div>
+                    </div>
+                    <!-- Blog Post 3 -->
+                    <div style="background-color:#ffffff; border-radius:0.75rem; overflow:hidden; border:1px solid #e0e0e0; display:flex; flex-direction:column;">
+                        <div style="width:100%; height:110px; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M8.1 13.34l2.83-2.83L3.91 3.5c-1.56 1.56-1.56 4.09 0 5.66l4.19 4.18zm6.78-1.81c1.53.71 3.68.21 5.27-1.38 1.91-1.91 2.28-4.65.81-6.12-1.46-1.46-4.20-1.10-6.12.81-1.59 1.59-2.09 3.74-1.38 5.27L3.7 19.87l1.41 1.41L12 14.41l6.88 6.88 1.41-1.41L13.41 13l1.47-1.47z" fill="#666"/>
+                            </svg>
+                        </div>
+                        <div style="padding:0.7rem; display:flex; flex-direction:column; gap:0.35rem;">
+                            <p style="font-size:0.5rem; color:#3d9eb3; margin:0; font-weight:600;">5 Nov 2025</p>
+                            <h3 style="font-size:0.9rem; font-weight:700; color:#000000; margin:0;">Alimentación balanceada para mascotas</h3>
+                            <p style="font-size:0.55rem; color:#666; margin:0; line-height:1.4;">Guía completa sobre cómo elegir la mejor alimentación para tu compañero peludo.</p>
+                            <a href="#" style="color:#3d9eb3; font-size:0.55rem; font-weight:600; text-decoration:none; margin-top:0.375rem;">Leer más →</a>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Sección de Galería de Fotos -->
+            <section style="background-color:#ffffff; border-radius:0.7rem; padding:0.85rem; border:1px solid #e0e0e0;">
+                <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.7rem; flex-wrap:wrap; gap:0.35rem;">
+                    <div style="flex:1; min-width:160px;">
+                        <div style="display:flex; align-items:center; gap:0.35rem; margin-bottom:0.375rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" fill="#3d9eb3"/>
+                            </svg>
+                            <h2 style="font-size:0.95rem; font-weight:600; color:#000000; margin:0;">Galería de Momentos Especiales</h2>
+                </div>
+                        <p style="font-size:0.55rem; color:#666; margin:0;">¡Crea recuerdos inolvidables! Sube las fotos más adorables de tus peluditos y construye una colección única de momentos felices. <span style="color:#3d9eb3; font-weight:600;">Cada imagen cuenta una historia.</span></p>
+                        </div>
+                    <button type="button" id="btn-subir-fotos" style="background-color:#3d9eb3; color:#ffffff; border:none; border-radius:0.375rem; padding:0.35rem 1rem; font-weight:600; font-size:0.55rem; cursor:pointer; display:flex; align-items:center; gap:0.375rem; white-space:nowrap;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z" fill="#ffffff"/>
+                        </svg>
+                        <span>Subir Fotos</span>
+                    </button>
+                    </div>
+                
+                <!-- Galería con scroll lateral -->
+                <div style="position:relative;">
+                    <div id="galeria-fotos" style="display:flex; gap:0.35rem; overflow-x:auto; overflow-y:hidden; padding:0.35rem 0; scroll-behavior:smooth; scrollbar-width:thin;">
+                        <!-- Fotos de ejemplo -->
+                        <div style="flex-shrink:0; width:135px; height:180px; border-radius:0.75rem; overflow:hidden; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8 2 5 5 5 9c0 3 2 5 7 10 5-5 7-7 7-10 0-4-3-7-7-7zm0 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#999"/>
+                            </svg>
+                        </div>
+                        <div style="flex-shrink:0; width:135px; height:180px; border-radius:0.75rem; overflow:hidden; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C10.5 2 9.5 3 9.5 4.5c0 1 0.5 2 2.5 2s2.5-1 2.5-2C14.5 3 13.5 2 12 2zm-3 6c-1.5 0-2.5 1-2.5 2.5v5c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5v-5C9.5 9 8.5 8 9 8zm6 0c-1.5 0-2.5 1-2.5 2.5v5c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5v-5C17.5 9 16.5 8 15 8z" fill="#999"/>
+                            </svg>
+                    </div>
+                        <div style="flex-shrink:0; width:135px; height:180px; border-radius:0.75rem; overflow:hidden; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8 2 5 5 5 9c0 3 2 5 7 10 5-5 7-7 7-10 0-4-3-7-7-7zm0 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#999"/>
+                            </svg>
+                        </div>
+                        <div style="flex-shrink:0; width:135px; height:180px; border-radius:0.75rem; overflow:hidden; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center;">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C10.5 2 9.5 3 9.5 4.5c0 1 0.5 2 2.5 2s2.5-1 2.5-2C14.5 3 13.5 2 12 2zm-3 6c-1.5 0-2.5 1-2.5 2.5v5c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5v-5C9.5 9 8.5 8 9 8zm6 0c-1.5 0-2.5 1-2.5 2.5v5c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5v-5C17.5 9 16.5 8 15 8z" fill="#999"/>
+                            </svg>
+                    </div>
+                    </div>
+                    <button type="button" id="btn-scroll-left" style="position:absolute; left:0; top:50%; transform:translateY(-50%); background-color:#ffffff; border:1px solid #e0e0e0; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:10; font-size:0.9rem;">‹</button>
+                    <button type="button" id="btn-scroll-right" style="position:absolute; right:0; top:50%; transform:translateY(-50%); background-color:#ffffff; border:1px solid #e0e0e0; border-radius:50%; width:32px; height:32px; display:flex; align-items:center; justify-content:center; cursor:pointer; box-shadow:0 2px 8px rgba(0,0,0,0.1); z-index:10; font-size:0.9rem;">›</button>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Funciones globales para el modal de eventos
+window.abrirModalEventos = function(fechaSeleccionada) {
+    const modalEventosBackdrop = document.getElementById('modal-eventos-backdrop');
+    if (modalEventosBackdrop) {
+        modalEventosBackdrop.style.display = 'flex';
+        // Si se proporciona una fecha, establecerla en el campo de fecha
+        if (fechaSeleccionada) {
+            const fechaInput = document.getElementById('id_fecha_evento');
+            if (fechaInput) {
+                fechaInput.value = fechaSeleccionada;
+            }
+        }
+    }
+};
+
+window.cerrarModalEventos = function() {
+    const modalEventosBackdrop = document.getElementById('modal-eventos-backdrop');
+    if (modalEventosBackdrop) {
+        modalEventosBackdrop.style.display = 'none';
+        // Limpiar formulario
+        const form = document.getElementById('form-evento-calendario');
+        if (form) {
+            form.reset();
+        }
+    }
+};
+
+window.cerrarModalEventoExitoso = function() {
+    const modalEventoExitoso = document.getElementById('modal-evento-exitoso');
+    if (modalEventoExitoso) {
+        modalEventoExitoso.style.display = 'none';
+    }
+};
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Toggle mascotas desactivadas
+    const toggleDesactivadas = document.getElementById('toggle-mascotas-desactivadas');
+    const contentDesactivadas = document.getElementById('mascotas-desactivadas-content');
+    const chevronDesactivadas = document.getElementById('chevron-desactivadas');
+    
+    if (toggleDesactivadas && contentDesactivadas) {
+        toggleDesactivadas.addEventListener('click', function() {
+            const isVisible = contentDesactivadas.style.display === 'block';
+            contentDesactivadas.style.display = isVisible ? 'none' : 'block';
+            if (chevronDesactivadas) {
+                chevronDesactivadas.textContent = isVisible ? '▼' : '▲';
+            }
+        });
+    }
+    
+    // Navegación de meses del calendario con AJAX (sin recargar la página)
+    const btnMesAnterior = document.getElementById('btn-mes-anterior');
+    const btnMesSiguiente = document.getElementById('btn-mes-siguiente');
+    const calendarioSection = document.getElementById('calendario');
+    
+    function actualizarCalendario(mes, anio) {
+        if (!calendarioSection) return;
+        
+        // Actualizar variables globales inmediatamente
+        window.calendarioMesActual = mes;
+        window.calendarioAnioActual = anio;
+        
+        // Mostrar indicador de carga sutil
+        const calendarioContent = calendarioSection.querySelector('div[style*="background-color:#3d9eb3"]');
+        if (calendarioContent) {
+            calendarioContent.style.transition = 'opacity 0.2s';
+            calendarioContent.style.opacity = '0.7';
+        }
+        
+        // Hacer petición AJAX para obtener el nuevo contenido
+        const url = `{% url 'home' %}?mes=${mes}&anio=${anio}`;
+        
+        fetch(url)
+            .then(response => {
+                if (!response.ok) throw new Error('Error en la respuesta');
+                return response.text();
+            })
+            .then(html => {
+                // Crear un elemento temporal para parsear el HTML
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = html;
+                
+                // Extraer solo la sección del calendario del HTML recibido
+                const nuevoCalendario = tempDiv.querySelector('#calendario');
+                
+                if (nuevoCalendario) {
+                    // Guardar la posición actual del scroll antes de actualizar
+                    const scrollPosition = window.pageYOffset;
+                    
+                    // Reemplazar el contenido del calendario
+                    calendarioSection.innerHTML = nuevoCalendario.innerHTML;
+                    
+                    // Restaurar inmediatamente la posición del scroll (sin animación)
+                    requestAnimationFrame(() => {
+                        window.scrollTo(0, scrollPosition);
+                    });
+                    
+                    // Reinicializar los event listeners del calendario
+                    inicializarCalendario();
+                } else {
+                    throw new Error('No se encontró el calendario en la respuesta');
+                }
+            })
+            .catch(error => {
+                console.error('Error al cargar el calendario:', error);
+                // En caso de error, recargar la página normalmente
+                window.location.href = url;
+            })
+            .finally(() => {
+                // Restaurar opacidad
+                if (calendarioContent) {
+                    calendarioContent.style.opacity = '1';
+                }
+            });
+    }
+    
+    function inicializarCalendario() {
+        // Reinicializar acordeones de semanas
+        document.querySelectorAll('.btn-accordion-semana').forEach(function(btn) {
+            btn.onclick = function() {
+                const targetId = btn.getAttribute('data-target');
+                const target = document.getElementById(targetId);
+                if (!target) return;
+                
+                // Buscar el chevron correspondiente
+                const chevronSelector = targetId.replace('semana-', '');
+                const chevron = btn.querySelector('.chevron-semana-' + chevronSelector) || btn.querySelector('span:last-child');
+                
+                const isVisible = target.style.display === 'block';
+                target.style.display = isVisible ? 'none' : 'block';
+                if (chevron) {
+                    chevron.textContent = isVisible ? '▼' : '▲';
+                }
+            };
+        });
+        
+        // Reinicializar botones de agregar evento
+        document.querySelectorAll('.btn-agregar-evento-semana').forEach(function(btn) {
+            btn.onclick = function(e) {
+                e.stopPropagation();
+                if (typeof abrirModalEventos === 'function') {
+                    abrirModalEventos();
+                }
+            };
+        });
+        
+        // Hacer los días clickeables
+        document.querySelectorAll('.dia-calendario').forEach(function(diaEl) {
+            diaEl.onclick = function(e) {
+                e.stopPropagation();
+                const diaNumero = diaEl.getAttribute('data-dia-numero');
+                if (diaNumero && diaNumero !== '') {
+                    // Obtener mes y año del atributo del elemento o de las variables globales
+                    const mes = diaEl.getAttribute('data-mes-calendario') || window.calendarioMesActual || new Date().getMonth() + 1;
+                    const anio = diaEl.getAttribute('data-anio-calendario') || window.calendarioAnioActual || new Date().getFullYear();
+                    const fechaSeleccionada = `${anio}-${String(mes).padStart(2, '0')}-${String(diaNumero).padStart(2, '0')}`;
+                    window.abrirModalEventos(fechaSeleccionada);
+                }
+            };
+        });
+        
+        // Reinicializar botones de navegación
+        const nuevoAnterior = document.getElementById('btn-mes-anterior');
+        const nuevoSiguiente = document.getElementById('btn-mes-siguiente');
+        
+        if (nuevoAnterior && nuevoSiguiente) {
+            nuevoAnterior.onclick = function(e) {
+                e.preventDefault();
+                let mes = window.calendarioMesActual;
+                let anio = window.calendarioAnioActual;
+                
+                mes -= 1;
+                if (mes < 1) {
+                    mes = 12;
+                    anio -= 1;
+                }
+                
+                actualizarCalendario(mes, anio);
+            };
+            
+            nuevoSiguiente.onclick = function(e) {
+                e.preventDefault();
+                let mes = window.calendarioMesActual;
+                let anio = window.calendarioAnioActual;
+                
+                mes += 1;
+                if (mes > 12) {
+                    mes = 1;
+                    anio += 1;
+                }
+                
+                actualizarCalendario(mes, anio);
+            };
+        }
+    }
+    
+    // Inicializar variables globales desde atributos data
+    const calendarioEl = document.getElementById('calendario');
+    window.calendarioMesActual = calendarioEl ? parseInt(calendarioEl.getAttribute('data-mes-actual')) || new Date().getMonth() + 1 : new Date().getMonth() + 1;
+    window.calendarioAnioActual = calendarioEl ? parseInt(calendarioEl.getAttribute('data-anio-actual')) || new Date().getFullYear() : new Date().getFullYear();
+    
+    if (btnMesAnterior && btnMesSiguiente && calendarioSection) {
+        btnMesAnterior.addEventListener('click', function(e) {
+            e.preventDefault();
+            let mes = window.calendarioMesActual;
+            let anio = window.calendarioAnioActual;
+            
+            mes -= 1;
+            if (mes < 1) {
+                mes = 12;
+                anio -= 1;
+            }
+            
+            actualizarCalendario(mes, anio);
+        });
+        
+        btnMesSiguiente.addEventListener('click', function(e) {
+            e.preventDefault();
+            let mes = window.calendarioMesActual;
+            let anio = window.calendarioAnioActual;
+            
+            mes += 1;
+            if (mes > 12) {
+                mes = 1;
+                anio += 1;
+            }
+            
+            actualizarCalendario(mes, anio);
+        });
+        
+        // Inicializar acordeones al cargar la página
+        inicializarCalendario();
+    }
+    
+    // Scroll lateral de la galería
+    const galeriaFotos = document.getElementById('galeria-fotos');
+    const btnScrollLeft = document.getElementById('btn-scroll-left');
+    const btnScrollRight = document.getElementById('btn-scroll-right');
+    
+    if (galeriaFotos && btnScrollLeft && btnScrollRight) {
+        btnScrollLeft.addEventListener('click', function() {
+            galeriaFotos.scrollBy({ left: -300, behavior: 'smooth' });
+        });
+        
+        btnScrollRight.addEventListener('click', function() {
+            galeriaFotos.scrollBy({ left: 300, behavior: 'smooth' });
+        });
+    }
+    
+    // Botón subir fotos
+    const btnSubirFotos = document.getElementById('btn-subir-fotos');
+    if (btnSubirFotos) {
+        btnSubirFotos.addEventListener('click', function() {
+            alert('Funcionalidad de subir fotos - pendiente de implementar');
+        });
+    }
+    
+    // Modal de eventos - event listeners
+    const modalEventosBackdrop = document.getElementById('modal-eventos-backdrop');
+    const cerrarModalEventosBtn = document.getElementById('cerrar-modal-eventos');
+    const cancelarModalEventosBtn = document.getElementById('cancelar-modal-eventos');
+    
+    if (cerrarModalEventosBtn) {
+        cerrarModalEventosBtn.addEventListener('click', window.cerrarModalEventos);
+    }
+    
+    if (cancelarModalEventosBtn) {
+        cancelarModalEventosBtn.addEventListener('click', window.cerrarModalEventos);
+    }
+    
+    // Cerrar modal al hacer clic fuera de él
+    if (modalEventosBackdrop) {
+        modalEventosBackdrop.addEventListener('click', function(e) {
+            if (e.target === modalEventosBackdrop) {
+                window.cerrarModalEventos();
+            }
+        });
+    }
+    
+    // Hacer los días clickeables (inicialización)
+    document.querySelectorAll('.dia-calendario').forEach(function(diaEl) {
+        diaEl.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const diaNumero = diaEl.getAttribute('data-dia-numero');
+            if (diaNumero && diaNumero !== '') {
+                const mes = window.calendarioMesActual || new Date().getMonth() + 1;
+                const anio = window.calendarioAnioActual || new Date().getFullYear();
+                const fechaSeleccionada = `${anio}-${String(mes).padStart(2, '0')}-${String(diaNumero).padStart(2, '0')}`;
+                window.abrirModalEventos(fechaSeleccionada);
+            }
+        });
+    });
+    
+    // Botones agregar evento desde semanas
+    document.querySelectorAll('.btn-agregar-evento-semana').forEach(function(btn) {
+        btn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            window.abrirModalEventos();
+        });
+    });
+    
+    // Funcionalidad del botón Desactivar
+    const btnDesactivar = document.getElementById('btn-desactivar');
+    const modalDesactivar = document.getElementById('modal-desactivar-backdrop');
+    
+    function abrirModalDesactivar() {
+            const mascotasActivas = document.querySelectorAll('[data-mascota-id]');
+            if (mascotasActivas.length === 0) {
+                alert('No hay mascotas activas para desactivar.');
+                return;
+            }
+            
+        // Limpiar opciones anteriores
+        const opcionesContainer = document.getElementById('opciones-mascotas');
+        if (!opcionesContainer) return;
+        
+        opcionesContainer.innerHTML = '';
+        
+        // Crear opciones para cada mascota
+            mascotasActivas.forEach((card, index) => {
+                const nombre = card.querySelector('h3')?.textContent || 'Sin nombre';
+            const razaElement = card.querySelector('p');
+            const raza = razaElement ? razaElement.textContent : 'Sin raza';
+            const mascotaId = card.getAttribute('data-mascota-id');
+            
+            // Determinar si es perro o gato desde el SVG
+            const iconoSVG = card.querySelector('svg');
+            const esGato = iconoSVG && iconoSVG.innerHTML.includes('M12 2C8 2');
+            
+            const opcionDiv = document.createElement('div');
+            opcionDiv.className = 'opcion-mascota';
+            opcionDiv.style.cssText = 'background-color:#f5f5f5; border:1px solid #e0e0e0; border-radius:0.35rem; padding:0.35rem; display:flex; align-items:center; gap:0.35rem; cursor:pointer; transition:background-color 0.2s;';
+            opcionDiv.addEventListener('click', function(e) {
+                if (e.target.type !== 'radio') {
+                    const radio = this.querySelector('input[type="radio"]');
+                    document.querySelectorAll('.opcion-mascota input[type="radio"]').forEach(r => r.checked = false);
+                    radio.checked = true;
+                }
+            });
+            
+            const iconoSVGContent = esGato 
+                ? '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C8 2 5 5 5 9c0 3 2 5 7 10 5-5 7-7 7-10 0-4-3-7-7-7zm0 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z" fill="#333"/></svg>'
+                : '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C10.5 2 9.5 3 9.5 4.5c0 1 0.5 2 2.5 2s2.5-1 2.5-2C14.5 3 13.5 2 12 2zm-3 6c-1.5 0-2.5 1-2.5 2.5v5c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5v-5C9.5 9 8.5 8 9 8zm6 0c-1.5 0-2.5 1-2.5 2.5v5c0 1.5 1 2.5 2.5 2.5s2.5-1 2.5-2.5v-5C17.5 9 16.5 8 15 8z" fill="#333"/></svg>';
+            
+            opcionDiv.innerHTML = `
+                <input type="radio" name="mascota_seleccionada" value="${mascotaId}" id="mascota-${mascotaId}" style="width:18px; height:18px; cursor:pointer; flex-shrink:0; accent-color:#666;">
+                <div style="width:2.5rem; height:2.5rem; border-radius:0.375rem; background-color:#b3e5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    ${iconoSVGContent}
+                </div>
+                <div style="flex:1;">
+                    <div style="font-weight:700; color:#000000; font-size:0.6rem; margin-bottom:0.15rem;">${index + 1}. ${nombre}</div>
+                    <div style="color:#666; font-size:0.5rem;">${raza}</div>
+                </div>
+            `;
+            
+            opcionesContainer.appendChild(opcionDiv);
+        });
+        
+        if (modalDesactivar) {
+            modalDesactivar.style.display = 'flex';
+            modalDesactivar.style.pointerEvents = 'auto';
+        }
+    }
+    
+    function cerrarModalDesactivar() {
+        if (modalDesactivar) {
+            modalDesactivar.style.display = 'none';
+            modalDesactivar.style.pointerEvents = 'none';
+            // Limpiar selección
+            document.querySelectorAll('.opcion-mascota input[type="radio"]').forEach(radio => radio.checked = false);
+        }
+    }
+    
+    function aceptarDesactivacion() {
+        const radioSeleccionado = document.querySelector('input[name="mascota_seleccionada"]:checked');
+        if (!radioSeleccionado) {
+            alert('Por favor, selecciona una mascota para desactivar.');
+            return;
+        }
+        
+        const mascotaId = radioSeleccionado.value;
+        
+                        // Crear formulario para enviar la petición
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `/mascotas/${mascotaId}/desactivar/`;
+                        
+                        const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                        if (csrfToken) {
+                            const csrfInput = document.createElement('input');
+                            csrfInput.type = 'hidden';
+                            csrfInput.name = 'csrfmiddlewaretoken';
+                            csrfInput.value = csrfToken.value;
+                            form.appendChild(csrfInput);
+                        }
+                        
+                        document.body.appendChild(form);
+                        form.submit();
+    }
+    
+    if (btnDesactivar) {
+        btnDesactivar.addEventListener('click', abrirModalDesactivar);
+    }
+    
+    window.cerrarModalDesactivar = cerrarModalDesactivar;
+    window.aceptarDesactivacion = aceptarDesactivacion;
+    
+    // Asegurar que los modales estén correctamente ocultos al cargar
+    if (modalDesactivar) {
+        modalDesactivar.style.display = 'none';
+        modalDesactivar.style.pointerEvents = 'none';
+    }
+    
+    const modalExcelente = document.getElementById('modal-excelente-backdrop');
+    if (modalExcelente) {
+        modalExcelente.style.display = 'none';
+        modalExcelente.style.pointerEvents = 'none';
+    }
+});
+</script>
+<!-- Modal Desactivar Mascota -->
+<div id="modal-desactivar-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:0.7rem; pointer-events:none;">
+    <div style="background:#ffffff; border-radius:0.75rem; max-width:360px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2); padding:1.5rem; pointer-events:auto;">
+        <h2 style="font-size:0.6rem; font-weight:700; color:#000000; margin:0 0 0.75rem;">Desactivar Mascota</h2>
+        <p style="font-size:0.55rem; color:#666; margin:0 0 1rem;">Selecciona la mascota que deseas desactivar:</p>
+        <div id="opciones-mascotas" style="display:flex; flex-direction:column; gap:0.35rem; margin-bottom:1.5rem;">
+            <!-- Las opciones se generarán dinámicamente con JavaScript -->
+        </div>
+        <div style="display:flex; gap:0.35rem; justify-content:flex-end; border-top:1px solid #e0e0e0; padding-top:1rem;">
+            <button onclick="cerrarModalDesactivar()" style="background-color:#e0e0e0; color:#333333; border:none; border-radius:0.35rem; padding:0.35rem 1.25rem; font-weight:600; font-size:0.6rem; cursor:pointer;">
+                Cancelar
+            </button>
+            <button onclick="aceptarDesactivacion()" style="background-color:#c0c0c0; color:#333333; border:none; border-radius:0.35rem; padding:0.35rem 1.25rem; font-weight:600; font-size:0.6rem; cursor:pointer;">
+                Aceptar
+            </button>
+        </div>
+    </div>
+</div>
+<!-- Modal Excelente -->
+<div id="modal-excelente-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; padding:0.7rem; pointer-events:none;">
+    <div id="modal-excelente" style="background:#ffffff; border:3px solid #d2de7d; border-radius:0.7rem; max-width:520px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.2); pointer-events:auto;">
+        <div style="display:flex; justify-content:flex-end; padding:0.35rem 0.75rem;">
+            <button onclick="cerrarModalExcelente()" style="background:#f0f0f0; border:none; border-radius:0.35rem; width:32px; height:32px; cursor:pointer;">✖</button>
+        </div>
+        <div style="padding:0.7rem 1.5rem 1.5rem; text-align:center;">
+            <div style="font-size:2.25rem; margin-bottom:0.5rem;">🎉</div>
+            <h3 style="margin:0 0 0.5rem; color:#1aa3b0; font-size:1.1rem; font-weight:800;">¡Excelente!</h3>
+            <p style="margin:0 0 1rem; color:#000000;">¡Gran trabajo administrando la medicación!</p>
+            <div style="background:#f5f5f5; border:1px solid #e0e0e0; color:#000000; border-radius:0.75rem; padding:0.35rem 1rem; margin:0 auto 1rem; max-width:360px;">
+                Estás potenciando la <strong style="color:#3d9eb3;">tenencia responsable</strong> de mascotas
+            </div>
+            <p style="margin:0; color:#666;">Progreso: 5%</p>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

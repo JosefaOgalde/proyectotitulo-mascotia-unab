@@ -1,0 +1,577 @@
+{% extends 'registro/base.html' %}
+{% load registro_extras %}
+{% load static %}
+
+{% block title %}Perfil de {{ mascota.nombre }} - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estilos del Footer */
+    .site-footer {
+        background-color: #f0f9fa;
+        padding: 48px 0 24px;
+        border-top: 1px solid #d0e8eb;
+        margin-top: 3rem;
+    }
+    
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px 24px;
+        display: grid;
+        grid-template-columns: 2fr 1.2fr 1.2fr 1.6fr;
+        gap: 32px;
+        font-size: 13px;
+        color: #555555;
+    }
+    
+    .footer-title {
+        font-weight: 700;
+        margin-bottom: 12px;
+        color: #00a9b4;
+        font-size: 14px;
+    }
+    
+    .footer-brand-title {
+        font-weight: 800;
+        color: #00a9b4;
+        margin-bottom: 10px;
+        font-size: 16px;
+    }
+    
+    .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .footer-list li {
+        margin-bottom: 8px;
+    }
+    
+    .footer-list a {
+        color: #555555;
+        transition: color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .footer-list a:hover {
+        color: #00a9b4;
+    }
+    
+    .footer-contact-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        color: #555555;
+    }
+    
+    .footer-contact-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background-color: #00a9b4;
+        color: #ffffff;
+        font-size: 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .footer-contact-icon svg {
+        width: 14px;
+        height: 14px;
+    }
+    
+    .footer-bottom {
+        border-top: 1px solid #d0e8eb;
+        margin-top: 16px;
+        padding-top: 24px;
+    }
+    
+    .footer-bottom-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        font-size: 14px;
+        color: #666666;
+    }
+    
+    .footer-socials {
+        display: flex;
+        gap: 12px;
+    }
+    
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #00a9b4;
+        color: #ffffff;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        font-weight: 600;
+        transition: background-color 0.2s ease;
+        text-decoration: none;
+    }
+    
+    .social-icon:hover {
+        background-color: #008491;
+    }
+    
+    .social-icon.instagram {
+        background-color: #00a9b4;
+    }
+    
+    .social-icon.instagram:hover {
+        background-color: #008491;
+    }
+    
+    @media (max-width: 768px) {
+        .footer-inner {
+            grid-template-columns: 1fr 1fr;
+            row-gap: 32px;
+        }
+        
+        .footer-bottom-inner {
+            flex-direction: column;
+            gap: 16px;
+            text-align: center;
+        }
+    }
+    
+    @media (max-width: 600px) {
+        .footer-inner {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="background-color:#f5f5f5; min-height:100vh; padding:2rem 0;">
+    <div style="max-width:1200px; margin:0 auto; width:100%; padding:0 24px;">
+        <!-- Volver -->
+        <div style="margin-bottom:0.75rem;">
+            <a href="{% url 'home' %}" style="color:#1aa3b0; font-weight:700; text-decoration:none; display:inline-flex; align-items:center; gap:0.5rem;">
+                <span>←</span>
+                <span>Volver al home</span>
+            </a>
+        </div>
+
+        <!-- ========== SECCIÓN 1: DATOS GENERALES ========== -->
+        <section style="background:#fff; border-radius:0.75rem; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #e0e0e0;">
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+                <div style="width:40px; height:40px; border-radius:50%; background-color:#b3e5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#3d9eb3"/>
+                    </svg>
+                </div>
+                <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Datos Generales</h2>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:1rem;">
+                <div>
+                    <div style="color:#666; font-size:0.75rem; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">FECHA DE NACIMIENTO</div>
+                    <div style="color:#000; font-size:1rem; font-weight:800;">{% if mascota.fecha_nacimiento %}{{ mascota.fecha_nacimiento|date:"d/m/Y" }}{% else %}—{% endif %}</div>
+                </div>
+                <div>
+                    <div style="color:#666; font-size:0.75rem; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">EDAD ACTUAL</div>
+                    <div style="color:#000; font-size:1rem; font-weight:800;">{{ mascota.edad }}</div>
+                </div>
+                <div>
+                    <div style="color:#666; font-size:0.75rem; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">COLOR DE PELAJE</div>
+                    <div style="color:#000; font-size:1rem; font-weight:800;">{{ mascota.color_pelaje|default:"—" }}</div>
+                </div>
+                <div>
+                    <div style="color:#666; font-size:0.75rem; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">GÉNERO</div>
+                    <div style="color:#000; font-size:1rem; font-weight:800;">{{ mascota.get_genero_display|default:"—" }}</div>
+                </div>
+                <div>
+                    <div style="color:#666; font-size:0.75rem; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">MICROCHIP</div>
+                    <div style="color:#000; font-size:1rem; font-weight:800;">{{ mascota.microchip|default:"—" }}</div>
+                </div>
+                <div>
+                    <div style="color:#666; font-size:0.75rem; font-weight:700; margin-bottom:0.5rem; text-transform:uppercase;">PESO IDEAL</div>
+                    <div style="color:#000; font-size:1rem; font-weight:800;">{% if ficha.peso_ideal %}{{ ficha.peso_ideal }}{% else %}—{% endif %}</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECCIÓN 2: RESUMEN DE SALUD ACTUAL ========== -->
+        <section style="background:#fff; border-radius:0.75rem; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #e0e0e0;">
+            <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+                <div style="width:40px; height:40px; border-radius:50%; background-color:#b3e5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#3d9eb3"/>
+                    </svg>
+                </div>
+                <h2 style="margin:0; font-size:1.25rem; font-weight:700; color:#000000;">Resumen de Salud Actual</h2>
+            </div>
+            
+            <div style="display:grid; grid-template-columns:repeat(4, 1fr); gap:1rem;">
+                <!-- Peso Actual -->
+                <div style="background-color:#e0f7fa; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#3d9eb3; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="color:#3d9eb3; font-size:0.75rem; font-weight:700; text-transform:uppercase;">PESO ACTUAL</div>
+                    </div>
+                    <div style="color:#000; font-size:1.5rem; font-weight:800; margin-bottom:0.5rem;">{% if ficha.peso %}{{ ficha.peso }} kg{% else %}—{% endif %}</div>
+                    <div style="color:#666; font-size:0.75rem; margin-bottom:0.5rem;">Actualizado: {% if ultimos_registros_peso %}{{ ultimos_registros_peso.0.fecha|date:"d/m/Y" }}{% else %}—{% endif %}</div>
+                    <div style="background-color:#4caf50; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.7rem; font-weight:600; display:inline-flex; align-items:center; gap:0.25rem;">
+                        <span style="width:6px; height:6px; border-radius:50%; background-color:#ffffff;"></span>
+                        <span>Estable</span>
+                    </div>
+                </div>
+                
+                <!-- Vacunas -->
+                <div style="background-color:#f3e5f5; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#9c27b0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.36 2.64C19.36 2.64 18.39 2 17.5 2c-.89 0-1.86.64-1.86.64S14.5 2.5 13.5 2.5c-1 0-2.14.64-2.14.64S10.22 2 9.5 2C8.61 2 7.64 2.64 7.64 2.64L6.5 4.5c-.5.5-.5 1.32 0 1.82L8 7.82v8.36L6.5 17.68c-.5.5-.5 1.32 0 1.82l1.14 1.86s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64s1.14.64 2.14.64c1 0 2.14-.64 2.14-.64s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64L19.5 19.5c.5-.5.5-1.32 0-1.82L18 15.18V7.82l1.5-1.5c.5-.5.5-1.32 0-1.82L19.36 2.64zM16 16H8V8h8v8z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="color:#9c27b0; font-size:0.75rem; font-weight:700; text-transform:uppercase;">VACUNAS</div>
+                    </div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#000000"/>
+                        </svg>
+                        <div style="color:#000; font-size:1.1rem; font-weight:800;">Al día</div>
+                    </div>
+                    <div style="color:#666; font-size:0.75rem; margin-bottom:0.5rem;">Última: {% if ultima_vacuna_nombre %}{{ ultima_vacuna_nombre }}{% else %}—{% endif %}</div>
+                    {% if ultima_vacuna %}
+                        {% with dias_proxima=ultima_vacuna.fecha_evento|timesince %}
+                        <div style="background-color:#9c27b0; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.7rem; font-weight:600; display:inline-block;">
+                            Próxima en 42 días
+                        </div>
+                        {% endwith %}
+                    {% endif %}
+                </div>
+                
+                <!-- Desparasitación Interna -->
+                <div style="background-color:#e8f5e9; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#4caf50; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.36 2.64C19.36 2.64 18.39 2 17.5 2c-.89 0-1.86.64-1.86.64S14.5 2.5 13.5 2.5c-1 0-2.14.64-2.14.64S10.22 2 9.5 2C8.61 2 7.64 2.64 7.64 2.64L6.5 4.5c-.5.5-.5 1.32 0 1.82L8 7.82v8.36L6.5 17.68c-.5.5-.5 1.32 0 1.82l1.14 1.86s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64s1.14.64 2.14.64c1 0 2.14-.64 2.14-.64s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64L19.5 19.5c.5-.5.5-1.32 0-1.82L18 15.18V7.82l1.5-1.5c.5-.5.5-1.32 0-1.82L19.36 2.64zM16 16H8V8h8v8z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="color:#4caf50; font-size:0.75rem; font-weight:700; text-transform:uppercase;">DESP. INTERNA</div>
+                    </div>
+                    <div style="color:#000; font-size:1.1rem; font-weight:800; margin-bottom:0.5rem;">Drontal Plus</div>
+                    <div style="color:#666; font-size:0.75rem; margin-bottom:0.5rem;">Última: 01/11/2024</div>
+                    <div style="background-color:#4caf50; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.7rem; font-weight:600; display:inline-block;">
+                        Próxima en 59 días
+                    </div>
+                </div>
+                
+                <!-- Desparasitación Externa -->
+                <div style="background-color:#e8f5e9; border-radius:0.5rem; padding:1rem;">
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#4caf50; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="color:#4caf50; font-size:0.75rem; font-weight:700; text-transform:uppercase;">DESP. EXTERNA</div>
+                    </div>
+                    <div style="color:#000; font-size:1.1rem; font-weight:800; margin-bottom:0.5rem;">Bravecto</div>
+                    <div style="color:#666; font-size:0.75rem; margin-bottom:0.5rem;">Última: 15/11/2024</div>
+                    <div style="background-color:#4caf50; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.7rem; font-weight:600; display:inline-block;">
+                        Próxima en 11 días
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECCIÓN 3: DASHBOARD (2x2) ========== -->
+        <section style="background:#fff; border-radius:0.75rem; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #e0e0e0;">
+            <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1.5rem;">
+                <!-- Medicamentos Actuales -->
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#2196f3; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.36 2.64C19.36 2.64 18.39 2 17.5 2c-.89 0-1.86.64-1.86.64S14.5 2.5 13.5 2.5c-1 0-2.14.64-2.14.64S10.22 2 9.5 2C8.61 2 7.64 2.64 7.64 2.64L6.5 4.5c-.5.5-.5 1.32 0 1.82L8 7.82v8.36L6.5 17.68c-.5.5-.5 1.32 0 1.82l1.14 1.86s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64s1.14.64 2.14.64c1 0 2.14-.64 2.14-.64s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64L19.5 19.5c.5-.5.5-1.32 0-1.82L18 15.18V7.82l1.5-1.5c.5-.5.5-1.32 0-1.82L19.36 2.64zM16 16H8V8h8v8z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h3 style="margin:0; font-size:1rem; font-weight:700; color:#000000;">Medicamentos Actuales</h3>
+                    </div>
+                    <div style="background-color:#e3f2fd; border:1px solid #90caf9; border-radius:0.5rem; padding:1rem; position:relative;">
+                        <span style="position:absolute; top:0.75rem; right:0.75rem; background-color:#2196f3; color:#ffffff; padding:0.25rem 0.75rem; border-radius:9999px; font-size:0.7rem; font-weight:600;">Activo</span>
+                        <div style="color:#000; font-size:1rem; font-weight:800; margin-bottom:0.5rem;">Omeprazol 20mg</div>
+                        <div style="color:#666; font-size:0.85rem; margin-bottom:0.75rem;">Para: Gastritis</div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:#000;">
+                            <div><strong>Dosis:</strong> 1 comprimido</div>
+                            <div><strong>Frecuencia:</strong> Cada 12 horas</div>
+                            <div><strong>Hasta:</strong> 30/11/2024</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Alimentación Actual -->
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#ff9800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.31-8.86c-1.77-.45-2.34-.94-2.34-1.67 0-.84.79-1.43 2.1-1.43 1.38 0 1.9.66 1.94 1.64h1.71c-.05-1.34-.87-2.57-2.49-2.97V5H10.9v1.69c-1.51.32-2.72 1.3-2.72 2.81 0 1.79 1.49 2.69 3.66 3.21 1.95.46 2.34 1.15 2.34 1.87 0 .53-.39 1.39-2.1 1.39-1.6 0-2.23-.72-2.32-1.64H8.04c.1 1.7 1.36 2.66 2.86 2.97V19h2.34v-1.67c1.52-.29 2.72-1.16 2.73-2.77-.01-2.2-1.9-2.96-3.66-3.42z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h3 style="margin:0; font-size:1rem; font-weight:700; color:#000000;">Alimentación Actual</h3>
+                    </div>
+                    <div style="background-color:#fff3e0; border:1px solid #ffcc80; border-radius:0.5rem; padding:1rem; margin-bottom:0.75rem;">
+                        <div style="color:#000; font-size:1rem; font-weight:800; margin-bottom:0.5rem;">Royal Canin Adult</div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:#000;">
+                            <div><strong>Tipo:</strong> Seco (croquetas)</div>
+                            <div><strong>Cantidad diaria:</strong> 120 gramos/día</div>
+                            <div><strong>Frecuencia:</strong> 2 veces al día</div>
+                            <div><strong>Horarios:</strong> 8AM y 6PM</div>
+                        </div>
+                    </div>
+                    <div style="background-color:#ffebee; border:1px solid #ffcdd2; border-radius:0.5rem; padding:1rem;">
+                        <div style="color:#000; font-size:0.9rem; font-weight:700; margin-bottom:0.5rem;">Alergias e Intolerancias</div>
+                        <div style="color:#666; font-size:0.85rem;">✓ Ninguna registrada</div>
+                    </div>
+                </div>
+                
+                <!-- Última Visita Veterinaria -->
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#ff9800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h3 style="margin:0; font-size:1rem; font-weight:700; color:#000000;">Última Visita Veterinaria</h3>
+                    </div>
+                    <div style="background-color:#fff3e0; border:1px solid #ffcc80; border-radius:0.5rem; padding:1rem; position:relative;">
+                        <div style="position:absolute; top:0.75rem; right:0.75rem; color:#666; font-size:0.85rem; font-weight:600;">20/11/2024</div>
+                        <div style="color:#000; font-size:1rem; font-weight:800; margin-bottom:0.75rem; padding-right:5rem;">Control de rutina</div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:#000;">
+                            <div><strong>Veterinario:</strong> Dr. García</div>
+                            <div><strong>Clínica:</strong> Clínica Veterinaria San José</div>
+                            <div><strong>Observaciones:</strong> Todo en orden</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Última Visita a Peluquería -->
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#e91e63; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.5 5.5L18.5 3.5l-2 2 2 2 2-2zm-4 0L14.5 3.5l-2 2 2 2 2-2zm-4 0L10.5 3.5l-2 2 2 2 2-2zM6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H6zm0 2h12v16H6V4z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <h3 style="margin:0; font-size:1rem; font-weight:700; color:#000000;">Última Visita a Peluquería</h3>
+                    </div>
+                    <div style="background-color:#fce4ec; border:1px solid #f8bbd0; border-radius:0.5rem; padding:1rem; position:relative;">
+                        <div style="position:absolute; top:0.75rem; right:0.75rem; color:#666; font-size:0.85rem; font-weight:600;">15/11/2024</div>
+                        <div style="color:#000; font-size:1rem; font-weight:800; margin-bottom:0.75rem; padding-right:5rem;">Baño y Corte Completo</div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:#000;">
+                            <div><strong>Establecimiento:</strong> Pet Spa Deluxe</div>
+                            <div><strong>Próxima visita:</strong> 15/12/2024</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========== SECCIÓN 4: PRÓXIMAS CITAS Y EVENTOS + CONTACTOS + PDF ========== -->
+        <section style="background:#fff; border-radius:0.75rem; padding:1.5rem; margin-bottom:1.5rem; border:1px solid #e0e0e0;">
+            <!-- Próximas Citas y Eventos -->
+            <div style="margin-bottom:2rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                    <div style="width:32px; height:32px; border-radius:50%; background-color:#b3e5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z" fill="#3d9eb3"/>
+                        </svg>
+                    </div>
+                    <h3 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Próximas Citas y Eventos</h3>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem;">
+                    <div style="background-color:#e8f5e9; border:1px solid #a5d6a7; border-radius:0.5rem; padding:1rem; display:flex; align-items:center; gap:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#4caf50; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="color:#000; font-size:0.95rem; font-weight:700; margin-bottom:0.25rem;">Desparasitación Externa</div>
+                            <div style="color:#666; font-size:0.85rem;">15/12/2024 • 11 días</div>
+                        </div>
+                    </div>
+                    <div style="background-color:#fce4ec; border:1px solid #f8bbd0; border-radius:0.5rem; padding:1rem; display:flex; align-items:center; gap:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#e91e63; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M20.5 5.5L18.5 3.5l-2 2 2 2 2-2zm-4 0L14.5 3.5l-2 2 2 2 2-2zm-4 0L10.5 3.5l-2 2 2 2 2-2zM6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2H6zm0 2h12v16H6V4z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="color:#000; font-size:0.95rem; font-weight:700; margin-bottom:0.25rem;">Baño y Corte</div>
+                            <div style="color:#666; font-size:0.85rem;">15/12/2024 • 11 días</div>
+                        </div>
+                    </div>
+                    <div style="background-color:#fff3e0; border:1px solid #ffcc80; border-radius:0.5rem; padding:1rem; display:flex; align-items:center; gap:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#ff9800; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2v14H3v3c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3V2l-1.5 1.5zM19 19c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1zm0-3H6V5h13v11zm-3-8H9v2h7V8zm0-3H9v2h7V5z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="color:#000; font-size:0.95rem; font-weight:700; margin-bottom:0.25rem;">Control Veterinario</div>
+                            <div style="color:#666; font-size:0.85rem;">20/12/2024 • 16 días</div>
+                        </div>
+                    </div>
+                    <div style="background-color:#f3e5f5; border:1px solid #e1bee7; border-radius:0.5rem; padding:1rem; display:flex; align-items:center; gap:0.75rem;">
+                        <div style="width:32px; height:32px; border-radius:50%; background-color:#9c27b0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M19.36 2.64C19.36 2.64 18.39 2 17.5 2c-.89 0-1.86.64-1.86.64S14.5 2.5 13.5 2.5c-1 0-2.14.64-2.14.64S10.22 2 9.5 2C8.61 2 7.64 2.64 7.64 2.64L6.5 4.5c-.5.5-.5 1.32 0 1.82L8 7.82v8.36L6.5 17.68c-.5.5-.5 1.32 0 1.82l1.14 1.86s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64s1.14.64 2.14.64c1 0 2.14-.64 2.14-.64s.93.64 1.86.64c.89 0 1.86-.64 1.86-.64L19.5 19.5c.5-.5.5-1.32 0-1.82L18 15.18V7.82l1.5-1.5c.5-.5.5-1.32 0-1.82L19.36 2.64zM16 16H8V8h8v8z" fill="#ffffff"/>
+                            </svg>
+                        </div>
+                        <div style="flex:1;">
+                            <div style="color:#000; font-size:0.95rem; font-weight:700; margin-bottom:0.25rem;">Vacuna Rabia</div>
+                            <div style="color:#666; font-size:0.85rem;">15/01/2025 • 42 días</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contactos de Emergencia -->
+            <div style="margin-bottom:2rem;">
+                <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:1rem;">
+                    <div style="width:32px; height:32px; border-radius:50%; background-color:#f44336; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="#ffffff"/>
+                        </svg>
+                    </div>
+                    <h3 style="margin:0; font-size:1.1rem; font-weight:700; color:#000000;">Contactos de Emergencia</h3>
+                </div>
+                <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem;">
+                    <div style="background-color:#ffebee; border:1px solid #ffcdd2; border-radius:0.5rem; padding:1rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                            <div style="width:24px; height:24px; border-radius:50%; background-color:#f44336; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                            <div style="color:#000; font-size:0.95rem; font-weight:700;">Tutor Responsable</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:#000;">
+                            <div><strong>Nombre:</strong> {{ request.user.first_name }} {{ request.user.last_name }}</div>
+                            <div><strong>Teléfono:</strong> {{ request.user.perfiltutor.telefono|default:"—" }}</div>
+                            <div><strong>Alternativo:</strong> —</div>
+                        </div>
+                    </div>
+                    <div style="background-color:#e3f2fd; border:1px solid #90caf9; border-radius:0.5rem; padding:1rem;">
+                        <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.75rem;">
+                            <div style="width:24px; height:24px; border-radius:50%; background-color:#2196f3; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19.5 3.5L18 2l-1.5 1.5L15 2l-1.5 1.5L12 2l-1.5 1.5L9 2 7.5 3.5 6 2v14H3v3c0 1.66 1.34 3 3 3h12c1.66 0 3-1.34 3-3V2l-1.5 1.5zM19 19c0 .55-.45 1-1 1H6c-.55 0-1-.45-1-1v-1h14v1zm0-3H6V5h13v11zm-3-8H9v2h7V8zm0-3H9v2h7V5z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                            <div style="color:#000; font-size:0.95rem; font-weight:700;">Veterinaria Habitual</div>
+                        </div>
+                        <div style="display:flex; flex-direction:column; gap:0.5rem; font-size:0.85rem; color:#000;">
+                            <div><strong>Clínica:</strong> Clínica Veterinaria San José</div>
+                            <div><strong>Teléfono:</strong> +56 2 2345 6789</div>
+                            <div><strong>Av. Principal 123, Santiago</strong></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Banner de Descarga PDF -->
+            <div style="background:linear-gradient(135deg, #3d9eb3 0%, #40e0d0 100%); border-radius:0.75rem; padding:2rem; display:flex; align-items:center; gap:1.5rem;">
+                <div style="width:64px; height:64px; border-radius:50%; background-color:#ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z" fill="#3d9eb3"/>
+                    </svg>
+                </div>
+                <div style="flex:1;">
+                    <h3 style="margin:0 0 0.5rem 0; font-size:1.25rem; font-weight:700; color:#ffffff;">Lleva el resumen siempre contigo</h3>
+                    <p style="margin:0; font-size:0.95rem; color:#ffffff; opacity:0.95;">Descarga este perfil en PDF optimizado para tu teléfono</p>
+                </div>
+                <button type="button" onclick="window.print()" style="background-color:#ffffff; color:#3d9eb3; border:2px solid #ffffff; border-radius:0.5rem; padding:0.75rem 1.5rem; font-weight:700; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; gap:0.5rem;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 12v7H5v-7H3v7c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2v-7h-2zm-6 .67l2.59-2.58L17 11.5l-5 5-5-5 1.41-1.41L11 12.67V3h2z" fill="#3d9eb3"/>
+                    </svg>
+                    <span>Descargar PDF</span>
+                </button>
+            </div>
+        </section>
+
+    </div>
+</div>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <div class="footer-brand-title">mascotia.app</div>
+                <p>Bitácora Digital de Salud Animal para Tutores. Centraliza el historial clínico de tus mascotas.</p>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Enlaces rápidos</div>
+                <ul class="footer-list">
+                    <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                    <li><a href="{% url 'home' %}">Panel</a></li>
+                    <li><a href="#">Sobre Nosotros</a></li>
+                    <li><a href="#">Servicios</a></li>
+                    <li><a href="#">Preguntas Frecuentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Soporte</div>
+                <ul class="footer-list">
+                    <li><a href="#">Centro de Ayuda</a></li>
+                    <li><a href="#">Términos y Condiciones</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Contacto</div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">@</span>
+                    <span>josefa@mascotia.app</span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"/>
+                        </svg>
+                    </span>
+                    <span>Santiago, Chile</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-inner">
+                <span>© 2024 Mascotia.app. Todos los derechos reservados.</span>
+                <div class="footer-socials">
+                    <a href="#" class="social-icon">f</a>
+                    <a href="#" class="social-icon instagram">IG</a>
+                    <a href="#" class="social-icon">in</a>
+                    <a href="#" class="social-icon">X</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+{% endblock %}
+
+{% block extra_js %}
+{% endblock %}

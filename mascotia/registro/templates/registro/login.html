@@ -1,0 +1,819 @@
+{% extends 'registro/base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow-y: auto;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5 !important;
+        position: relative;
+    }
+
+    /* Asegurar que no haya overlays bloqueando */
+    body::before,
+    body::after {
+        display: none !important;
+    }
+
+    /* Asegurar que todos los elementos sean interactivos */
+    * {
+        pointer-events: auto;
+    }
+
+    /* Navbar simple */
+    .login-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: #f8fbfc;
+        padding: 14px 0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        z-index: 100;
+    }
+
+    .login-navbar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .login-navbar-brand {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        color: #00a9b4;
+        text-decoration: none;
+    }
+
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        background-color: #f5f5f5;
+        padding-top: 62px;
+        overflow-y: auto;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-left: 24px;
+        padding-right: 24px;
+        gap: 1rem;
+    }
+
+    /* Panel izquierdo con imagen */
+    .login-left-panel {
+        flex: 1;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        padding: 1.5rem 0.5rem 1.5rem 1.5rem;
+        position: relative;
+        overflow: hidden;
+        height: calc(100vh - 50px);
+    }
+
+    .login-image-container {
+        width: 100%;
+        max-width: 420px;
+        background-color: #5bb4c5;
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        min-height: 500px;
+        overflow: hidden;
+    }
+
+    .login-left-panel img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        width: auto;
+        height: auto;
+        border-radius: 1rem;
+    }
+
+    /* Panel derecho con formulario */
+    .login-right-panel {
+        flex: 1;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 1.5rem 1.5rem 1.5rem 0.5rem;
+        background-color: #f5f5f5;
+        overflow-y: auto;
+        min-height: calc(100vh - 50px);
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 420px;
+        background-color: #ffffff;
+        border-radius: 1.25rem;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        height: 100%;
+        min-height: 500px;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+        z-index: 1;
+    }
+
+    .back-link {
+        color: #5bb4c5;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.4rem;
+        font-size: 0.75rem;
+        transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: #4aa3b3;
+    }
+
+    .login-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.6rem;
+    }
+
+    .login-logo svg {
+        width: 26px;
+        height: 26px;
+        fill: #ffffff;
+    }
+    
+    .login-logo-img {
+        width: 32px;
+        height: 32px;
+        filter: brightness(0) invert(1);
+        object-fit: contain;
+    }
+
+    .login-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #333333;
+        text-align: center;
+        margin-bottom: 0.15rem;
+    }
+
+    .login-subtitle {
+        font-size: 0.8rem;
+        color: #666666;
+        text-align: center;
+        margin-bottom: 0.85rem;
+    }
+
+    .login-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        flex: 1;
+        position: relative;
+        z-index: 10;
+        pointer-events: auto;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        position: relative;
+        z-index: 10;
+        pointer-events: auto;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #333333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        color: #333333;
+        background-color: #ffffff;
+        transition: border-color 0.2s ease;
+        position: relative;
+        z-index: 10;
+        pointer-events: auto;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #5bb4c5;
+        box-shadow: 0 0 0 3px rgba(91, 180, 197, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #999999;
+    }
+
+    .form-error {
+        font-size: 0.85rem;
+        color: #e74c3c;
+        margin-top: 0.25rem;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 0.7rem 1.5rem;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 0.2rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .submit-button-icon {
+        width: 18px;
+        height: 18px;
+        filter: brightness(0) invert(1);
+        object-fit: contain;
+    }
+
+    .submit-button:hover {
+        background-color: #4aa3b3;
+    }
+
+    .register-link {
+        text-align: center;
+        margin-top: 0.6rem;
+        font-size: 0.8rem;
+        color: #666666;
+    }
+
+    .register-link a {
+        color: #5bb4c5;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .register-link a:hover {
+        text-decoration: underline;
+    }
+
+    .recover-link {
+        text-align: center;
+        margin-top: 0.6rem;
+        font-size: 0.8rem;
+    }
+
+    .recover-link-text {
+        color: #5bb4c5;
+        text-decoration: none;
+        font-weight: 500;
+        cursor: pointer;
+    }
+
+    .recover-link-text:hover {
+        text-decoration: underline;
+    }
+
+    .recover-form-container {
+        margin-top: 0.6rem;
+        position: relative;
+        z-index: 1;
+        background-color: transparent;
+    }
+
+    .cancel-button {
+        width: 100%;
+        padding: 0.7rem 1.5rem;
+        background-color: #e0e0e0;
+        color: #333333;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 0.5rem;
+    }
+
+    .cancel-button:hover {
+        background-color: #d0d0d0;
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+        .login-container {
+            flex-direction: column;
+            padding-top: 50px;
+        }
+
+        .login-left-panel {
+            min-height: 200px;
+            padding: 1rem;
+        }
+
+        .login-right-panel {
+            padding: 0.75rem;
+            overflow-y: auto;
+        }
+
+        .login-card {
+            padding: 1.25rem;
+            max-height: calc(100vh - 260px);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .login-left-panel {
+            min-height: 180px;
+        }
+
+        .login-card {
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+
+        .login-title {
+            font-size: 1.35rem;
+        }
+
+        .login-subtitle {
+            font-size: 0.8rem;
+        }
+
+        .login-form {
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar simple -->
+<nav class="login-navbar">
+    <a href="{% url 'inicio' %}" class="login-navbar-brand">mascotia.app</a>
+</nav>
+
+<div class="login-container">
+    <!-- Panel izquierdo con imagen -->
+    <div class="login-left-panel">
+        <div class="login-image-container">
+            <img src="{% static 'registro/images/inicia-sesion.png' %}" alt="Mascotia - Iniciar sesión">
+        </div>
+    </div>
+
+    <!-- Panel derecho con formulario -->
+    <div class="login-right-panel">
+        <div class="login-card">
+            <!-- Volver al inicio -->
+            <a href="{% url 'inicio' %}" class="back-link">
+                <span>←</span>
+                <span>Volver al inicio</span>
+            </a>
+
+            <!-- Logo -->
+            <div class="login-logo">
+                <img src="{% static 'registro/icons/buscar-mapa.svg' %}" alt="Mascotia" class="login-logo-img">
+            </div>
+
+            <!-- Título -->
+            <h1 class="login-title">Iniciar Sesión</h1>
+            <p class="login-subtitle">Accede a tu cuenta de Mascotia.app</p>
+
+            <!-- Formulario -->
+            <form method="post" class="login-form">
+                {% csrf_token %}
+
+                <!-- Campo Email/Usuario -->
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+                    {{ form.username }}
+                    {% if form.username.errors %}
+                        <div class="form-error">
+                            {% for error in form.username.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group">
+                    <label for="{{ form.password.id_for_label }}">{{ form.password.label }}</label>
+                    {{ form.password }}
+                    {% if form.password.errors %}
+                        <div class="form-error">
+                            {% for error in form.password.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Errores generales del formulario -->
+                {% if form.non_field_errors %}
+                    <div class="form-error">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Botón de envío -->
+                <button type="submit" class="submit-button">
+                    <img src="{% static 'registro/icons/registro.svg' %}" alt="Registro" class="submit-button-icon">
+                    <span>Iniciar Sesión</span>
+                </button>
+            </form>
+
+            <!-- Link recuperar clave -->
+            <div class="recover-link">
+                <a href="#" id="toggle-recover" class="recover-link-text">Recuperar clave</a>
+            </div>
+
+            <!-- Formulario de recuperación (oculto por defecto) -->
+            <div id="recover-form-container" class="recover-form-container" style="display: none;">
+                <h2 class="login-title" style="font-size: 1.2rem; margin-bottom: 0.5rem;">Recuperar Contraseña</h2>
+                <p class="login-subtitle" style="margin-bottom: 1rem;">Ingresa tu email y una nueva contraseña</p>
+                
+                <form method="post" action="{% url 'recuperar_clave' %}" class="login-form">
+                    {% csrf_token %}
+                    
+                    {% if recuperar_form %}
+                        <!-- Campo Email -->
+                        <div class="form-group">
+                            <label for="{{ recuperar_form.email.id_for_label }}">
+                                {{ recuperar_form.email.label }}
+                            </label>
+                            {{ recuperar_form.email }}
+                            {% if recuperar_form.email.errors %}
+                                <div class="form-error">
+                                    {% for error in recuperar_form.email.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo Nueva Contraseña -->
+                        <div class="form-group">
+                            <label for="{{ recuperar_form.nueva_password.id_for_label }}">
+                                {{ recuperar_form.nueva_password.label }}
+                            </label>
+                            {{ recuperar_form.nueva_password }}
+                            {% if recuperar_form.nueva_password.errors %}
+                                <div class="form-error">
+                                    {% for error in recuperar_form.nueva_password.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Campo Confirmar Contraseña -->
+                        <div class="form-group">
+                            <label for="{{ recuperar_form.confirmar_password.id_for_label }}">
+                                {{ recuperar_form.confirmar_password.label }}
+                            </label>
+                            {{ recuperar_form.confirmar_password }}
+                            {% if recuperar_form.confirmar_password.errors %}
+                                <div class="form-error">
+                                    {% for error in recuperar_form.confirmar_password.errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Errores generales del formulario -->
+                        {% if recuperar_form.non_field_errors %}
+                            <div class="form-error">
+                                {% for error in recuperar_form.non_field_errors %}
+                                    <p>{{ error }}</p>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    {% else %}
+                        <!-- Formulario cuando no hay recuperar_form (para JavaScript) -->
+                        <div class="form-group">
+                            <label for="id_email_recover">Correo Electrónico</label>
+                            <input type="email" name="email" id="id_email_recover" class="form-control" placeholder="tu@email.com" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_nueva_password_recover">Ingresa nueva contraseña</label>
+                            <input type="password" name="nueva_password" id="id_nueva_password_recover" class="form-control" placeholder="••••" minlength="4" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="id_confirmar_password_recover">Reingresa nueva contraseña</label>
+                            <input type="password" name="confirmar_password" id="id_confirmar_password_recover" class="form-control" placeholder="••••" minlength="4" required>
+                        </div>
+                    {% endif %}
+
+                    <!-- Botón de envío -->
+                    <button type="submit" class="submit-button">Actualizar Contraseña</button>
+                    <button type="button" id="cancel-recover" class="cancel-button">Cancelar</button>
+                </form>
+            </div>
+
+            <!-- Link a registro -->
+            <div class="register-link">
+                <span>¿No tienes cuenta? </span>
+                <a href="{% url 'registro' %}">Regístrate aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleRecover = document.getElementById('toggle-recover');
+    const recoverFormContainer = document.getElementById('recover-form-container');
+    const loginForm = document.querySelector('.login-form');
+    const cancelRecover = document.getElementById('cancel-recover');
+    const registerLink = document.querySelector('.register-link');
+    
+    if (toggleRecover && recoverFormContainer) {
+        toggleRecover.addEventListener('click', function(e) {
+            e.preventDefault();
+            if (recoverFormContainer.style.display === 'none') {
+                recoverFormContainer.style.display = 'block';
+                if (loginForm) loginForm.style.display = 'none';
+                if (toggleRecover.parentElement) toggleRecover.parentElement.style.display = 'none';
+            }
+        });
+    }
+    
+    if (cancelRecover && recoverFormContainer) {
+        cancelRecover.addEventListener('click', function() {
+            recoverFormContainer.style.display = 'none';
+            if (loginForm) loginForm.style.display = 'flex';
+            const recoverLink = document.querySelector('.recover-link');
+            if (recoverLink) recoverLink.style.display = 'block';
+        });
+    }
+    
+    // Si viene de la vista de recuperar, mostrar el formulario
+    {% if mostrar_recuperar %}
+    if (recoverFormContainer) {
+        recoverFormContainer.style.display = 'block';
+        if (loginForm) loginForm.style.display = 'none';
+        const recoverLink = document.querySelector('.recover-link');
+        if (recoverLink) recoverLink.style.display = 'none';
+    }
+    {% endif %}
+
+    // Eliminar cualquier overlay o elemento que esté bloqueando
+    const allElements = document.querySelectorAll('*');
+    allElements.forEach(function(el) {
+        const computedStyle = window.getComputedStyle(el);
+        // Si hay un elemento con fondo negro y está bloqueando, eliminarlo o hacerlo transparente
+        if (computedStyle.backgroundColor === 'rgb(0, 0, 0)' || 
+            computedStyle.backgroundColor === 'rgba(0, 0, 0, 0)' ||
+            computedStyle.backgroundColor === 'black') {
+            if (computedStyle.position === 'fixed' || computedStyle.position === 'absolute') {
+                if (computedStyle.zIndex > 50) {
+                    el.style.display = 'none';
+                }
+            }
+        }
+        // Asegurar que los elementos del formulario sean clickeables
+        if (el.classList.contains('form-control') || 
+            el.classList.contains('form-group') || 
+            el.classList.contains('submit-button') ||
+            el.classList.contains('cancel-button')) {
+            el.style.pointerEvents = 'auto';
+            el.style.zIndex = '100';
+        }
+    });
+});
+</script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <div class="footer-brand-title">mascotia.app</div>
+                <p>Bitácora Digital de Salud Animal para Tutores. Centraliza el historial clínico de tus mascotas.</p>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Enlaces rápidos</div>
+                <ul class="footer-list">
+                    <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                    <li><a href="{% url 'home' %}">Panel</a></li>
+                    <li><a href="#">Sobre Nosotros</a></li>
+                    <li><a href="#">Servicios</a></li>
+                    <li><a href="#">Preguntas Frecuentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Soporte</div>
+                <ul class="footer-list">
+                    <li><a href="#">Centro de Ayuda</a></li>
+                    <li><a href="#">Términos y Condiciones</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Contacto</div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">@</span>
+                    <span>josefa@mascotia.app</span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"/>
+                        </svg>
+                    </span>
+                    <span>Santiago, Chile</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-inner">
+                <span>© 2024 Mascotia.app. Todos los derechos reservados.</span>
+                <div class="footer-socials">
+                    <a href="#" class="social-icon">f</a>
+                    <a href="#" class="social-icon instagram">IG</a>
+                    <a href="#" class="social-icon">in</a>
+                    <a href="#" class="social-icon">X</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+    /* Estilos del Footer */
+    .site-footer {
+        background-color: #f0f9fa;
+        padding: 3rem 2rem 1.5rem;
+        margin-top: 4rem;
+    }
+
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .footer-col {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .footer-brand-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #5bb4c5;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-col p {
+        font-size: 0.9rem;
+        color: #666666;
+        line-height: 1.6;
+    }
+
+    .footer-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .footer-list li a {
+        color: #666666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+
+    .footer-list li a:hover {
+        color: #5bb4c5;
+    }
+
+    .footer-contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #666666;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-contact-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .footer-bottom {
+        border-top: 1px solid #e0e0e0;
+        padding-top: 1.5rem;
+    }
+
+    .footer-bottom-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #666666;
+    }
+
+    .footer-socials {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .social-icon.instagram {
+        background-color: #5bb4c5;
+    }
+
+    @media (max-width: 768px) {
+        .footer-inner {
+            grid-template-columns: 1fr;
+        }
+        
+        .footer-bottom-inner {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    </style>
+{% endblock %}

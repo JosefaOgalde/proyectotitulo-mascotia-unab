@@ -1,0 +1,1090 @@
+{% extends 'registro/base.html' %}
+{% load static %}
+{% load registro_extras %}
+
+{% block title %}Panel de Control - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    body {
+        background-color: #f5f5f5;
+    }
+
+    /* Header */
+    .home-header {
+        background-color: #ffffff;
+        padding: 1rem 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .home-header-brand {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #5bb4c5;
+        text-decoration: none;
+    }
+
+    .home-header-actions {
+        display: flex;
+        gap: 0.75rem;
+        align-items: center;
+    }
+
+    .btn-profile {
+        background-color: #e8e8e8;
+        color: #000000;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .btn-logout {
+        background-color: #5bb4c5;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    /* Hero Section */
+    .home-hero {
+        background-color: #5bb4c5;
+        padding: 2rem;
+        color: #ffffff;
+    }
+
+    .home-hero-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .home-hero-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .home-hero-avatar {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #e8e8e8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #ffffff;
+    }
+
+    .home-hero-avatar svg {
+        width: 30px;
+        height: 30px;
+        fill: #666666;
+    }
+
+    .home-hero-text {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .home-hero-greeting {
+        font-size: 0.9rem;
+        color: #e8e8e8;
+        margin-bottom: 0.25rem;
+    }
+
+    .home-hero-name {
+        font-size: 1.5rem;
+        font-weight: 700;
+    }
+
+    .home-hero-right {
+        text-align: right;
+    }
+
+    .home-hero-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .home-hero-subtitle {
+        font-size: 0.9rem;
+        color: #e8e8e8;
+    }
+
+    /* Main Content */
+    .home-main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Mascotas Section */
+    .mascotas-section {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .mascotas-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .mascotas-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+    }
+
+    .mascotas-actions {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .btn-add {
+        background-color: #5bb4c5;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-deactivate {
+        background-color: #e8e8e8;
+        color: #000000;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+    }
+
+    .mascotas-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .mascota-card {
+        background-color: #ffffff;
+        border: 1px solid #e8e8e8;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .mascota-card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .mascota-icon {
+        width: 60px;
+        height: 60px;
+        background-color: #5bb4c5;
+        border-radius: 0.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .mascota-icon svg {
+        width: 40px;
+        height: 40px;
+        fill: #ffffff;
+    }
+
+    .mascota-info {
+        flex: 1;
+    }
+
+    .mascota-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.25rem;
+    }
+
+    .mascota-breed {
+        font-size: 0.9rem;
+        color: #666666;
+    }
+
+    .mascota-details {
+        margin-bottom: 1rem;
+    }
+
+    .mascota-detail-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .mascota-detail-label {
+        color: #666666;
+    }
+
+    .mascota-detail-value {
+        color: #000000;
+        font-weight: 600;
+    }
+
+    .mascota-card-footer {
+        margin-top: auto;
+    }
+
+    .btn-view-profile {
+        width: 100%;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        text-align: center;
+        font-weight: 600;
+        display: block;
+    }
+
+    /* Mascotas Desactivadas */
+    .mascotas-inactivas-section {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .mascotas-inactivas-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        transition: background-color 0.2s;
+    }
+
+    .mascotas-inactivas-header:hover {
+        background-color: #f5f5f5;
+    }
+
+    .mascotas-inactivas-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #000000;
+    }
+
+    .mascotas-inactivas-content {
+        display: none;
+        margin-top: 1.5rem;
+    }
+
+    .mascotas-inactivas-content.show {
+        display: block;
+    }
+
+    .mascota-inactiva-badge {
+        display: inline-block;
+        background-color: #e8e8e8;
+        color: #666666;
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-left: 0.5rem;
+    }
+
+    .mascota-icon-inactive {
+        background-color: #e8e8e8;
+    }
+
+    .mascota-icon-inactive svg {
+        fill: #666666;
+    }
+
+    .btn-view-profile-inactive {
+        background-color: #e8e8e8;
+        color: #000000;
+    }
+
+    /* Calendar Section */
+    .calendar-section {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .calendar-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .calendar-label {
+        font-size: 0.9rem;
+        color: #5bb4c5;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+    }
+
+    .calendar-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+
+    .calendar-description {
+        font-size: 0.9rem;
+        color: #666666;
+    }
+
+    .calendar-description a {
+        color: #5bb4c5;
+        text-decoration: none;
+    }
+
+    .calendar-container {
+        background-color: #5bb4c5;
+        border-radius: 1rem;
+        padding: 1.5rem;
+    }
+
+    .calendar-nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background-color: #4a9ba8;
+        padding: 0.75rem 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .calendar-nav-btn {
+        background: none;
+        border: none;
+        color: #ffffff;
+        font-size: 1.25rem;
+        cursor: pointer;
+        padding: 0.25rem 0.5rem;
+    }
+
+    .calendar-month {
+        color: #ffffff;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .calendar-weeks {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .calendar-week {
+        background-color: #ffffff;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .calendar-week:hover {
+        background-color: #f5f5f5;
+    }
+
+    .calendar-week-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+
+    .calendar-week-title {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        color: #000000;
+    }
+
+    .calendar-week-icon {
+        width: 20px;
+        height: 20px;
+        color: #5bb4c5;
+    }
+
+    .calendar-week-days {
+        display: none;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        margin-top: 0.75rem;
+    }
+
+    .calendar-week-days.show {
+        display: grid;
+    }
+
+    .calendar-day {
+        background-color: #f5f5f5;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        text-align: center;
+    }
+
+    .calendar-day-name {
+        font-size: 0.75rem;
+        color: #666666;
+        margin-bottom: 0.25rem;
+    }
+
+    .calendar-day-number {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #5bb4c5;
+    }
+
+    .calendar-week-add {
+        background-color: #5bb4c5;
+        color: #ffffff;
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    /* Blog Section */
+    .blog-section {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .blog-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+
+    .blog-subtitle {
+        font-size: 0.9rem;
+        color: #666666;
+        margin-bottom: 1.5rem;
+    }
+
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .blog-card {
+        border-radius: 0.75rem;
+        overflow: hidden;
+        border: 1px solid #e8e8e8;
+    }
+
+    .blog-card-image {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+    }
+
+    .blog-card-content {
+        padding: 1.5rem;
+    }
+
+    .blog-card-date {
+        font-size: 0.85rem;
+        color: #5bb4c5;
+        margin-bottom: 0.5rem;
+    }
+
+    .blog-card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+
+    .blog-card-description {
+        font-size: 0.9rem;
+        color: #666666;
+        margin-bottom: 0.75rem;
+    }
+
+    .blog-card-link {
+        color: #5bb4c5;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+    }
+
+    /* Gallery Section */
+    .gallery-section {
+        background-color: #ffffff;
+        border-radius: 1rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .gallery-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1.5rem;
+    }
+
+    .gallery-title-section {
+        flex: 1;
+    }
+
+    .gallery-icon {
+        display: inline-block;
+        margin-right: 0.5rem;
+    }
+
+    .gallery-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+
+    .gallery-description {
+        font-size: 0.9rem;
+        color: #666666;
+    }
+
+    .gallery-description .highlight {
+        color: #5bb4c5;
+    }
+
+    .btn-upload {
+        background-color: #5bb4c5;
+        color: #ffffff;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.5rem;
+        text-decoration: none;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .gallery-carousel {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.75rem;
+    }
+
+    .gallery-track {
+        display: flex;
+        gap: 1rem;
+        transition: transform 0.3s ease;
+    }
+
+    .gallery-item {
+        flex: 0 0 250px;
+        height: 200px;
+        border-radius: 0.5rem;
+        overflow: hidden;
+    }
+
+    .gallery-item img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .gallery-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(255, 255, 255, 0.9);
+        border: none;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    .gallery-nav.prev {
+        left: 1rem;
+    }
+
+    .gallery-nav.next {
+        right: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .home-hero-content {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .home-hero-right {
+            text-align: left;
+        }
+
+        .mascotas-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .blog-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<header class="home-header">
+    <a href="{% url 'home' %}" class="home-header-brand">mascotia.app</a>
+    <div class="home-header-actions">
+        <a href="{% url 'perfil' %}" class="btn-profile">Mi perfil</a>
+        <form method="post" action="{% url 'logout' %}" style="margin:0; display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn-logout" style="border:none; cursor:pointer;">Cerrar sesión</button>
+        </form>
+    </div>
+</header>
+
+<!-- Hero Section -->
+<section class="home-hero">
+    <div class="home-hero-content">
+        <div class="home-hero-left">
+            <div class="home-hero-avatar">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z" fill="currentColor"/>
+                </svg>
+            </div>
+            <div class="home-hero-text">
+                <span class="home-hero-greeting">Bienvenida de vuelta,</span>
+                <span class="home-hero-name">Hola {{ user_name }}</span>
+            </div>
+        </div>
+        <div class="home-hero-right">
+            <h1 class="home-hero-title">Panel de Control</h1>
+            <p class="home-hero-subtitle">Gestiona la información y el bienestar de tus mascotas</p>
+        </div>
+    </div>
+</section>
+
+<!-- Main Content -->
+<main class="home-main">
+    <!-- Mascotas Section -->
+    <section class="mascotas-section">
+        <div class="mascotas-header">
+            <h2 class="mascotas-title">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="#5bb4c5"/>
+                </svg>
+                Mis Mascotas ({{ mascotas_data|length }} activas)
+            </h2>
+            <div class="mascotas-actions">
+                <a href="{% url 'registro_mascota' %}" class="btn-add">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                    </svg>
+                    Agregar
+                </a>
+                <a href="#" class="btn-deactivate">Desactivar</a>
+            </div>
+        </div>
+        <div class="mascotas-grid">
+            {% for mascota in mascotas_data %}
+            <div class="mascota-card">
+                <div class="mascota-card-header">
+                    <div class="mascota-icon">
+                        {% if mascota.especie_raw == 'perro' %}
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
+                        </svg>
+                        {% else %}
+                        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
+                        </svg>
+                        {% endif %}
+                    </div>
+                    <div class="mascota-info">
+                        <div class="mascota-name">{{ mascota.nombre }}</div>
+                        <div class="mascota-breed">{{ mascota.raza }}</div>
+                    </div>
+                </div>
+                <div class="mascota-details">
+                    <div class="mascota-detail-row">
+                        <span class="mascota-detail-label">ID Mascota:</span>
+                        <span class="mascota-detail-value">{{ mascota.microchip }}</span>
+                    </div>
+                    <div class="mascota-detail-row">
+                        <span class="mascota-detail-label">Fecha de Nacimiento:</span>
+                        <span class="mascota-detail-value">{{ mascota.fecha_nacimiento|date:"d/m/Y" }}</span>
+                    </div>
+                    <div class="mascota-detail-row">
+                        <span class="mascota-detail-label">Edad:</span>
+                        <span class="mascota-detail-value">{{ mascota.edad_display }}</span>
+                    </div>
+                    <div class="mascota-detail-row">
+                        <span class="mascota-detail-label">Color de Pelaje:</span>
+                        <span class="mascota-detail-value">{{ mascota.color_pelaje }}</span>
+                    </div>
+                    <div class="mascota-detail-row">
+                        <span class="mascota-detail-label">Alergias:</span>
+                        <span class="mascota-detail-value">No manifiesta</span>
+                    </div>
+                </div>
+                <div class="mascota-card-footer">
+                    <a href="{% url 'bitacora_mascota' mascota.id %}" class="btn-view-profile">Ver Ficha {{ mascota.nombre }}</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+
+    <!-- Mascotas Desactivadas -->
+    {% if mascotas_inactivas_data %}
+    <section class="mascotas-inactivas-section">
+        <div class="mascotas-inactivas-header" onclick="toggleInactivas()">
+            <h2 class="mascotas-inactivas-title">
+                Mascotas Desactivadas ({{ mascotas_inactivas_data|length }})
+            </h2>
+            <svg id="chevron-inactivas" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="transform: rotate(0deg); transition: transform 0.3s;">
+                <path d="M7.41 8.59L12 13.17L16.59 8.59L18 10L12 16L6 10L7.41 8.59Z" fill="#666666"/>
+            </svg>
+        </div>
+        <div class="mascotas-inactivas-content" id="inactivas-content">
+            <div class="mascotas-grid">
+                {% for mascota in mascotas_inactivas_data %}
+                <div class="mascota-card">
+                    <div class="mascota-card-header">
+                        <div class="mascota-icon mascota-icon-inactive">
+                            {% if mascota.especie_raw == 'perro' %}
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
+                            </svg>
+                            {% else %}
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z" fill="currentColor"/>
+                            </svg>
+                            {% endif %}
+                        </div>
+                        <div class="mascota-info">
+                            <div class="mascota-name">
+                                {{ mascota.nombre }}
+                                <span class="mascota-inactiva-badge">Desactivada</span>
+                            </div>
+                            <div class="mascota-breed">{{ mascota.raza }}</div>
+                        </div>
+                    </div>
+                    <div class="mascota-details">
+                        <div class="mascota-detail-row">
+                            <span class="mascota-detail-label">ID Mascota:</span>
+                            <span class="mascota-detail-value">{{ mascota.microchip }}</span>
+                        </div>
+                        <div class="mascota-detail-row">
+                            <span class="mascota-detail-label">Fecha de Nacimiento:</span>
+                            <span class="mascota-detail-value">{{ mascota.fecha_nacimiento|date:"d/m/Y" }}</span>
+                        </div>
+                        <div class="mascota-detail-row">
+                            <span class="mascota-detail-label">Edad:</span>
+                            <span class="mascota-detail-value">{{ mascota.edad_display }}</span>
+                        </div>
+                        <div class="mascota-detail-row">
+                            <span class="mascota-detail-label">Color de Pelaje:</span>
+                            <span class="mascota-detail-value">{{ mascota.color_pelaje }}</span>
+                        </div>
+                        <div class="mascota-detail-row">
+                            <span class="mascota-detail-label">Alergias:</span>
+                            <span class="mascota-detail-value">No manifiesta</span>
+                        </div>
+                    </div>
+                    <div class="mascota-card-footer">
+                        <a href="{% url 'bitacora_mascota' mascota.id %}" class="btn-view-profile btn-view-profile-inactive">Ver Ficha {{ mascota.nombre }}</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Calendar Section -->
+    <section class="calendar-section">
+        <div class="calendar-header">
+            <div class="calendar-label">PRÓXIMAS CITAS</div>
+            <h2 class="calendar-title">Recordatorios importantes</h2>
+            <p class="calendar-description">
+                No hay citas registradas. <a href="#">Añade tus próximas visitas al veterinario para verlas aquí.</a>
+            </p>
+        </div>
+        <div class="calendar-container">
+            <div class="calendar-nav">
+                <button class="calendar-nav-btn" onclick="changeMonth(-1)">‹</button>
+                <div class="calendar-month" id="calendar-month">Noviembre 2025</div>
+                <button class="calendar-nav-btn" onclick="changeMonth(1)">›</button>
+            </div>
+            <div class="calendar-weeks" id="calendar-weeks">
+                <!-- Weeks will be generated by JavaScript -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section class="blog-section">
+        <h2 class="blog-title">Blog para Tutores</h2>
+        <p class="blog-subtitle">Mantente informado con los mejores consejos para el cuidado de tus mascotas</p>
+        <div class="blog-grid">
+            <div class="blog-card">
+                <img src="{% static 'registro/images/blog-cat-winter.jpg' %}" alt="Cuidados para gatos en invierno" class="blog-card-image" onerror="this.style.display='none'">
+                <div class="blog-card-content">
+                    <div class="blog-card-date">15 Nov 2025</div>
+                    <h3 class="blog-card-title">Cuidados esenciales para gatos en invierno</h3>
+                    <p class="blog-card-description">Aprende cómo mantener a tu gato saludable durante los meses fríos del año.</p>
+                    <a href="#" class="blog-card-link">Leer más →</a>
+                </div>
+            </div>
+            <div class="blog-card">
+                <img src="{% static 'registro/images/blog-vaccines.jpg' %}" alt="Importancia de las vacunas" class="blog-card-image" onerror="this.style.display='none'">
+                <div class="blog-card-content">
+                    <div class="blog-card-date">10 Nov 2025</div>
+                    <h3 class="blog-card-title">La importancia de las vacunas anuales</h3>
+                    <p class="blog-card-description">Descubre por qué es crucial mantener al día el calendario de vacunación de tu mascota.</p>
+                    <a href="#" class="blog-card-link">Leer más →</a>
+                </div>
+            </div>
+            <div class="blog-card">
+                <img src="{% static 'registro/images/blog-nutrition.jpg' %}" alt="Alimentación balanceada" class="blog-card-image" onerror="this.style.display='none'">
+                <div class="blog-card-content">
+                    <div class="blog-card-date">5 Nov 2025</div>
+                    <h3 class="blog-card-title">Alimentación balanceada para mascotas</h3>
+                    <p class="blog-card-description">Guía completa sobre cómo elegir la mejor alimentación para tu compañero peludo.</p>
+                    <a href="#" class="blog-card-link">Leer más →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery-section">
+        <div class="gallery-header">
+            <div class="gallery-title-section">
+                <h2 class="gallery-title">
+                    <span class="gallery-icon">🐾</span>
+                    Galería de Momentos Especiales
+                </h2>
+                <p class="gallery-description">
+                    ¡Crea recuerdos inolvidables! 📸 Sube las fotos más adorables de tus peluditos y construye una colección única de momentos felices. <span class="highlight">Cada imagen cuenta una historia.</span>
+                </p>
+            </div>
+            <a href="#" class="btn-upload">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                </svg>
+                Subir Fotos
+            </a>
+        </div>
+        <div class="gallery-carousel">
+            <button class="gallery-nav prev" onclick="moveCarousel(-1)">‹</button>
+            <div class="gallery-track" id="gallery-track">
+                <!-- Gallery items will be added here -->
+                <div class="gallery-item">
+                    <img src="{% static 'registro/images/gallery-placeholder.jpg' %}" alt="Mascota" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22250%22 height=%22200%22%3E%3Crect fill=%22%23e8e8e8%22 width=%22250%22 height=%22200%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22%3EImagen%3C/text%3E%3C/svg%3E'">
+                </div>
+            </div>
+            <button class="gallery-nav next" onclick="moveCarousel(1)">›</button>
+        </div>
+    </section>
+</main>
+
+<!-- Footer -->
+{% include 'registro/footer.html' %}
+
+<script>
+// Toggle mascotas desactivadas
+function toggleInactivas() {
+    const content = document.getElementById('inactivas-content');
+    const chevron = document.getElementById('chevron-inactivas');
+    content.classList.toggle('show');
+    if (content.classList.contains('show')) {
+        chevron.style.transform = 'rotate(180deg)';
+    } else {
+        chevron.style.transform = 'rotate(0deg)';
+    }
+}
+
+// Calendar functionality
+let currentDate = new Date();
+currentDate.setMonth(10); // November (0-indexed)
+currentDate.setFullYear(2025);
+
+function changeMonth(direction) {
+    currentDate.setMonth(currentDate.getMonth() + direction);
+    updateCalendar();
+}
+
+function updateCalendar() {
+    const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 
+                       'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    document.getElementById('calendar-month').textContent = 
+        `${monthNames[currentDate.getMonth()]} ${currentDate.getFullYear()}`;
+    
+    generateWeeks();
+}
+
+function generateWeeks() {
+    const weeksContainer = document.getElementById('calendar-weeks');
+    weeksContainer.innerHTML = '';
+    
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    
+    let currentWeekStart = new Date(firstDay);
+    const dayOfWeek = firstDay.getDay();
+    if (dayOfWeek > 0) {
+        currentWeekStart.setDate(firstDay.getDate() - dayOfWeek);
+    }
+    
+    const weeks = [];
+    let weekStart = new Date(currentWeekStart);
+    
+    while (weekStart <= lastDay || weekStart.getMonth() === month) {
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        weeks.push({
+            start: new Date(weekStart),
+            end: new Date(weekEnd)
+        });
+        
+        weekStart.setDate(weekStart.getDate() + 7);
+        
+        if (weekStart.getMonth() > month && weekStart.getDate() > 7) {
+            break;
+        }
+    }
+    
+    weeks.forEach((week, index) => {
+        const weekDiv = document.createElement('div');
+        weekDiv.className = 'calendar-week';
+        weekDiv.onclick = function() { toggleWeek(this); };
+        
+        const startStr = formatDate(week.start);
+        const endStr = formatDate(week.end);
+        
+        weekDiv.innerHTML = `
+            <div class="calendar-week-header">
+                <div class="calendar-week-title">
+                    <svg class="calendar-week-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2" fill="none"/>
+                        <path d="M16 2V6M8 2V6M3 10H21" stroke="currentColor" stroke-width="2"/>
+                    </svg>
+                    Semana ${index + 1}: ${startStr} - ${endStr}
+                </div>
+                <a href="#" class="calendar-week-add" onclick="event.stopPropagation();">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="currentColor"/>
+                    </svg>
+                    Agregar evento
+                </a>
+            </div>
+            <div class="calendar-week-days">
+                ${generateDays(week.start)}
+            </div>
+        `;
+        
+        weeksContainer.appendChild(weekDiv);
+    });
+}
+
+function formatDate(date) {
+    const months = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const day = date.getDate();
+    const month = months[date.getMonth()];
+    return `${day} ${month}`;
+}
+
+function generateDays(weekStart) {
+    const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    let html = '';
+    const currentDay = new Date(weekStart);
+    
+    for (let i = 0; i < 7; i++) {
+        html += `
+            <div class="calendar-day">
+                <div class="calendar-day-name">${dayNames[currentDay.getDay()]}</div>
+                <div class="calendar-day-number">${currentDay.getDate()}</div>
+            </div>
+        `;
+        currentDay.setDate(currentDay.getDate() + 1);
+    }
+    
+    return html;
+}
+
+function toggleWeek(weekElement) {
+    const days = weekElement.querySelector('.calendar-week-days');
+    days.classList.toggle('show');
+}
+
+// Gallery carousel
+let galleryPosition = 0;
+
+function moveCarousel(direction) {
+    const track = document.getElementById('gallery-track');
+    const items = track.querySelectorAll('.gallery-item');
+    const itemWidth = 250 + 16; // width + gap
+    
+    galleryPosition += direction * itemWidth;
+    galleryPosition = Math.max(0, Math.min(galleryPosition, (items.length - 1) * itemWidth));
+    
+    track.style.transform = `translateX(-${galleryPosition}px)`;
+}
+
+// Initialize calendar
+updateCalendar();
+</script>
+{% endblock %}
+

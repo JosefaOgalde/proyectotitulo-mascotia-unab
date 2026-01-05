@@ -1,0 +1,1078 @@
+{% extends 'registro/base.html' %}
+
+{% block title %}Mi Perfil - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-wrapper {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 24px;
+    }
+    
+    .profile-page-container {
+        display: flex;
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        min-height: 600px;
+    }
+    
+    .profile-left-panel {
+        flex: 0 0 45%;
+        background-color: #3d9eb3;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding: 3rem 2rem;
+        color: #ffffff;
+        gap: 2rem;
+    }
+    
+    .profile-image-container {
+        width: 100%;
+        max-width: 300px;
+        aspect-ratio: 1;
+        border-radius: 0.75rem;
+        background-color: rgba(255,255,255,0.1);
+        border: 2px dashed rgba(255,255,255,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        position: relative;
+        margin-bottom: 1rem;
+    }
+    
+    .profile-image-container img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+    }
+    
+    .profile-image-container.has-image img {
+        display: block;
+    }
+    
+    .profile-image-container.has-image {
+        border: 2px solid rgba(255,255,255,0.5);
+        background-color: rgba(255,255,255,0.05);
+    }
+    
+    .profile-image-placeholder {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 2rem;
+        color: rgba(255,255,255,0.9);
+    }
+    
+    .profile-image-placeholder svg {
+        width: 80px;
+        height: 80px;
+        margin-bottom: 1rem;
+        opacity: 0.7;
+    }
+    
+    .profile-left-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+    
+    .profile-left-subtitle {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+        text-align: center;
+        opacity: 0.95;
+    }
+    
+    .profile-upload-btn {
+        background-color: #ffffff;
+        color: #3d9eb3;
+        border: 2px solid #3d9eb3;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        transition: background-color 0.2s;
+        margin-bottom: 0.5rem;
+    }
+    
+    .profile-upload-btn:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .profile-left-later {
+        font-size: 0.85rem;
+        opacity: 0.9;
+        text-align: center;
+    }
+    
+    .profile-right-panel {
+        flex: 0 0 55%;
+        background-color: #ffffff;
+        padding: 2rem 3rem;
+        overflow-y: auto;
+        border-left: 1px solid #e0e0e0;
+    }
+    
+    .profile-header-right {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .profile-header-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: #3d9eb3;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .profile-header-icon svg {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .profile-header-text {
+        flex: 1;
+    }
+    
+    .profile-header-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #000000;
+        margin: 0;
+    }
+    
+    .profile-header-subtitle {
+        font-size: 0.9rem;
+        color: #666666;
+        margin: 0.25rem 0 0;
+    }
+    
+    .back-link {
+        color: #3d9eb3;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .back-link:hover {
+        text-decoration: underline;
+    }
+    
+    .form-section {
+        margin-bottom: 2rem;
+    }
+    
+    .form-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #000000;
+        margin: 0 0 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid #e0e0e0;
+    }
+    
+    .form-field {
+        margin-bottom: 1.25rem;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-label .required {
+        color: #3d9eb3;
+    }
+    
+    .form-input {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.9rem;
+        background-color: #f5f5f5;
+        font-family: inherit;
+    }
+    
+    .form-input:focus {
+        outline: none;
+        border-color: #3d9eb3;
+        background-color: #ffffff;
+    }
+    
+    .form-help-text {
+        font-size: 0.75rem;
+        color: #666666;
+        margin-top: 0.25rem;
+    }
+    
+    .form-error {
+        font-size: 0.75rem;
+        color: #f44336;
+        margin-top: 0.25rem;
+    }
+    
+    .phone-input-wrapper {
+        position: relative;
+    }
+    
+    .phone-prefix {
+        position: absolute;
+        left: 0.75rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #333333;
+        font-weight: 600;
+        font-size: 0.9rem;
+        pointer-events: none;
+    }
+    
+    .phone-input-wrapper .form-input {
+        padding-left: 3.5rem;
+    }
+    
+    .form-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 2.5rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e0e0e0;
+    }
+    
+    .btn-primary {
+        background-color: #3d9eb3;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.5rem;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-primary:hover {
+        background-color: #2d8ba0;
+    }
+    
+    .btn-secondary {
+        background-color: #ffffff;
+        color: #333333;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        font-size: 0.9rem;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background-color 0.2s;
+    }
+    
+    .btn-secondary:hover {
+        background-color: #f5f5f5;
+    }
+    
+    .rewards-section {
+        background-color: #ffffff;
+        border-radius: 0.75rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .mission-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+    }
+    
+    @media (max-width: 1024px) {
+        .profile-wrapper {
+            padding: 1rem 24px;
+        }
+        
+        .profile-page-container {
+            flex-direction: column;
+        }
+        
+        .profile-left-panel {
+            flex: 0 0 auto;
+            padding: 2rem;
+        }
+        
+        .profile-right-panel {
+            flex: 1;
+            padding: 2rem;
+            border-left: none;
+            border-top: 1px solid #e0e0e0;
+        }
+        
+        .mission-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .profile-left-panel {
+            padding: 1.5rem;
+        }
+        
+        .profile-left-icon {
+            width: 80px;
+            height: 80px;
+        }
+        
+        .profile-left-icon svg {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .profile-left-title {
+            font-size: 1.25rem;
+        }
+        
+        .profile-left-subtitle {
+            font-size: 0.85rem;
+        }
+        
+        .profile-right-panel {
+            padding: 1.5rem;
+        }
+        
+        .form-actions {
+            flex-direction: column;
+        }
+        
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            text-align: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="background-color:#f5f5f5; min-height:calc(100vh - 70px);">
+    <!-- Banner teal completo -->
+    <div style="background-color:#3d9eb3; padding:2rem 0;">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:2rem;">
+            <!-- Lado izquierdo: Foto y saludo -->
+            <div style="display:flex; align-items:center; gap:1.5rem;">
+                <form id="form-foto-perfil-banner" method="post" action="{% url 'perfil_tutor' %}" enctype="multipart/form-data" style="margin:0; display:inline-block;">
+                    {% csrf_token %}
+                    <input type="file" id="input-foto-perfil-banner" name="foto_perfil" accept="image/*" style="display:none;" onchange="document.getElementById('form-foto-perfil-banner').submit();">
+                    {% if perfil.foto_perfil %}
+                        <div id="foto-perfil-container" style="width:160px; height:160px; border-radius:50%; background-color:#ffffff; border:3px solid #ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer; position:relative; transition:all 0.2s;" onclick="document.getElementById('input-foto-perfil-banner').click();" onmouseover="document.getElementById('icono-editar-perfil').style.opacity='1';" onmouseout="document.getElementById('icono-editar-perfil').style.opacity='0';" title="Haz clic para cambiar tu foto de perfil">
+                            <img src="{{ perfil.foto_perfil.url }}" alt="{{ user.first_name }}" style="width:100%; height:100%; object-fit:cover; border-radius:50%; display:block;">
+                            <div id="icono-editar-perfil" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div id="foto-perfil-container" style="width:160px; height:160px; border-radius:50%; background-color:#ffffff; border:3px solid #ffffff; display:flex; align-items:center; justify-content:center; flex-shrink:0; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,0.2); cursor:pointer; position:relative; transition:all 0.2s;" onclick="document.getElementById('input-foto-perfil-banner').click();" onmouseover="document.getElementById('icono-editar-perfil-vacio').style.opacity='1';" onmouseout="document.getElementById('icono-editar-perfil-vacio').style.opacity='0';" title="Haz clic para agregar tu foto de perfil">
+                            <svg width="80" height="80" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#b3e5f0"/>
+                            </svg>
+                            <div id="icono-editar-perfil-vacio" style="position:absolute; top:0; left:0; right:0; bottom:0; background-color:rgba(0,0,0,0.4); border-radius:50%; display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity 0.2s;">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" fill="#ffffff"/>
+                                </svg>
+                            </div>
+                        </div>
+                    {% endif %}
+                </form>
+                <div>
+                    <p style="color:#ffffff; font-size:1rem; margin:0 0 0.25rem; opacity:0.9;">Estas en tu perfil</p>
+                    <h1 style="color:#ffffff; font-size:1.5rem; font-weight:700; margin:0; line-height:1.2;">Hola {{ user.first_name }}</h1>
+                </div>
+            </div>
+            <!-- Lado derecho: Título -->
+            <div style="text-align:right;">
+                <h2 style="color:#ffffff; font-size:1.5rem; font-weight:700; margin:0; line-height:1.2;">Mi Perfil</h2>
+                <p style="color:#ffffff; font-size:1rem; margin:0.3rem 0 0; opacity:0.9;">Gestiona tu información</p>
+            </div>
+        </div>
+    </div>
+
+    <main style="padding:2rem 0; background-color:#f5f5f5;">
+        <div style="max-width:1200px; margin:0 auto; padding:0 24px;">
+            <!-- Formulario de Información Personal -->
+            <div style="background-color:#ffffff; border-radius:0.75rem; padding:2rem; margin-bottom:2rem; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ perfil_form.foto_perfil }}
+                    
+                    <!-- Información Personal - Dos columnas -->
+                    <div class="form-section">
+                        <h2 class="form-section-title">Información Personal</h2>
+                        
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem;">
+                            <!-- Columna Izquierda -->
+                            <div>
+                                <div class="form-field">
+                                    <label for="{{ perfil_form.sobrenombre.id_for_label }}" class="form-label">
+                                        {{ perfil_form.sobrenombre.label }}
+                                    </label>
+                                    <input type="text" name="sobrenombre" id="{{ perfil_form.sobrenombre.id_for_label }}" value="{{ perfil_form.sobrenombre.value|default:'' }}" class="form-input" placeholder="¿Cómo prefieres que te llamemos?">
+                                    {% if perfil_form.sobrenombre.errors %}
+                                        <div class="form-error">
+                                            {% for error in perfil_form.sobrenombre.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="{{ user_form.first_name.id_for_label }}" class="form-label">
+                                        Nombre Completo <span class="required">*</span>
+                                    </label>
+                                    <input type="text" name="first_name" id="{{ user_form.first_name.id_for_label }}" value="{{ user_form.first_name.value|default:'' }}" class="form-input" required>
+                                    {% if user_form.first_name.errors %}
+                                        <div class="form-error">
+                                            {% for error in user_form.first_name.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="{{ user_form.email.id_for_label }}" class="form-label">
+                                        Correo Electrónico <span class="required">*</span>
+                                    </label>
+                                    <input type="email" name="email" id="{{ user_form.email.id_for_label }}" value="{{ user_form.email.value|default:'' }}" class="form-input" required>
+                                    {% if user_form.email.errors %}
+                                        <div class="form-error">
+                                            {% for error in user_form.email.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="{{ perfil_form.telefono.id_for_label }}" class="form-label">
+                                        {{ perfil_form.telefono.label }}
+                                    </label>
+                                    <div class="phone-input-wrapper">
+                                        <span class="phone-prefix">+569</span>
+                                        <input type="text" name="telefono" id="{{ perfil_form.telefono.id_for_label }}" value="{% if perfil_form.telefono.value %}{% if perfil_form.telefono.value|slice:':4' == '+569' %}{{ perfil_form.telefono.value|slice:'4:' }}{% else %}{{ perfil_form.telefono.value }}{% endif %}{% endif %}" class="form-input" placeholder="12345678" maxlength="8" pattern="[0-9]{8}">
+                                    </div>
+                                    {% if perfil_form.telefono.help_text %}
+                                        <p class="form-help-text">{{ perfil_form.telefono.help_text }}</p>
+                                    {% endif %}
+                                    {% if perfil_form.telefono.errors %}
+                                        <div class="form-error">
+                                            {% for error in perfil_form.telefono.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Columna Derecha -->
+                            <div>
+                                <div class="form-field">
+                                    <label for="{{ perfil_form.ocupacion.id_for_label }}" class="form-label">
+                                        {{ perfil_form.ocupacion.label }}
+                                    </label>
+                                    <input type="text" name="ocupacion" id="{{ perfil_form.ocupacion.id_for_label }}" value="{{ perfil_form.ocupacion.value|default:'' }}" class="form-input" placeholder="Ej: Profesor, Ingeniero, Estudiante, etc.">
+                                    {% if perfil_form.ocupacion.errors %}
+                                        <div class="form-error">
+                                            {% for error in perfil_form.ocupacion.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="{{ perfil_form.fecha_nacimiento.id_for_label }}" class="form-label">
+                                        {{ perfil_form.fecha_nacimiento.label }}
+                                    </label>
+                                    <input type="date" name="fecha_nacimiento" id="{{ perfil_form.fecha_nacimiento.id_for_label }}" value="{% if perfil_form.fecha_nacimiento.value %}{{ perfil_form.fecha_nacimiento.value|date:'Y-m-d' }}{% endif %}" class="form-input">
+                                    {% if perfil_form.fecha_nacimiento.errors %}
+                                        <div class="form-error">
+                                            {% for error in perfil_form.fecha_nacimiento.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label for="{{ perfil_form.ciudad.id_for_label }}" class="form-label">
+                                        Ciudad
+                                    </label>
+                                    <select name="ciudad" id="{{ perfil_form.ciudad.id_for_label }}" class="form-input">
+                                        {% for value, label in perfil_form.ciudad.field.choices %}
+                                            <option value="{{ value }}" {% if perfil_form.ciudad.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    {% if perfil_form.ciudad.errors %}
+                                        <div class="form-error">
+                                            {% for error in perfil_form.ciudad.errors %}
+                                                <p>{{ error }}</p>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    {% if user_form.non_field_errors or perfil_form.non_field_errors %}
+                        <div class="form-error" style="margin-bottom: 1rem;">
+                            {% for error in user_form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                            {% for error in perfil_form.non_field_errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="form-actions" style="justify-content:flex-end; margin-top:2rem;">
+                        <button type="submit" class="btn-primary">Guardar Cambios</button>
+                    </div>
+                </form>
+            </div>
+            
+            <!-- Sección de Sistema de Recompensas -->
+            <div style="background-color:#ffffff; border-radius:0.75rem; padding:2rem; margin-bottom:2rem; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
+                <!-- Header del Sistema de Recompensas -->
+                <div style="display:flex; align-items:center; gap:1rem; margin-bottom:2rem;">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#3d9eb3" stroke-width="1.5" fill="none"/>
+                    </svg>
+                    <div>
+                        <h2 style="font-size:1.5rem; font-weight:700; color:#000000; margin:0;">Sistema de Recompensas</h2>
+                        <p style="font-size:0.9rem; color:#666666; margin:0.25rem 0 0;">Gana estrellas completando misiones de cuidado</p>
+                    </div>
+                </div>
+                
+                <!-- Estrellas Ganadas y Nivel -->
+                <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:1.5rem; gap:2rem;">
+                    <div style="flex:1;">
+                        <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1rem;">
+                            <span style="font-size:2.5rem; font-weight:700; color:#000000;">127</span>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffc107"/>
+                            </svg>
+                        </div>
+                        <div style="background-color:#e0e0e0; border-radius:0.5rem; height:8px; margin-bottom:0.5rem; overflow:hidden;">
+                            <div style="background-color:#3d9eb3; height:100%; width:76%; border-radius:0.5rem;"></div>
+                        </div>
+                        <div style="font-size:0.85rem; color:#666666;">76/100 para siguiente nivel</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div style="font-size:0.85rem; font-weight:700; color:#666666; margin-bottom:0.5rem;">NIVEL</div>
+                        <div style="font-size:1.1rem; font-weight:700; color:#000000;">Tutor Experto</div>
+                    </div>
+                </div>
+                
+                <!-- Misiones Disponibles -->
+                <div style="margin-bottom:2rem;">
+                    <h3 style="font-size:1.1rem; font-weight:700; color:#000000; margin:0 0 1.5rem;">Misiones Disponibles</h3>
+                    <div style="display:grid; grid-template-columns:repeat(2, 1fr); gap:1rem;">
+                        <!-- Misión 1: Vacuna al día -->
+                        <div style="background-color:#f5f5f5; border-radius:0.75rem; padding:1.25rem; position:relative;">
+                            <div style="position:absolute; top:1rem; right:1rem;">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#4caf50"/>
+                                </svg>
+                            </div>
+                            <div style="display:flex; align-items:flex-start; gap:1rem;">
+                                <div style="width:48px; height:48px; border-radius:50%; background-color:#b3e5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M9 2v2H7v2H5v2H3v12h18V8h-2V6h-2V4h-2V2H9zm0 2h6v2h2v2h2v2H5v-2h2V6h2V4h2V4H9v2zm-4 6v8h16v-8H5z" fill="#3d9eb3"/>
+                                    </svg>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:1rem; font-weight:700; color:#000000; margin-bottom:0.5rem;">Vacuna al día</div>
+                                    <div style="font-size:0.85rem; color:#666666; margin-bottom:0.75rem;">Mantener el calendario de vacunación completo</div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffc107"/>
+                                        </svg>
+                                        <span style="font-size:0.9rem; font-weight:600; color:#000000;">+15 estrellas</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Misión 2: Control mensual -->
+                        <div style="background-color:#f5f5f5; border-radius:0.75rem; padding:1.25rem; position:relative;">
+                            <div style="position:absolute; top:1rem; right:1rem; font-size:0.9rem; font-weight:700; color:#3d9eb3;">2/3</div>
+                            <div style="display:flex; align-items:flex-start; gap:1rem;">
+                                <div style="width:48px; height:48px; border-radius:50%; background-color:#b3e5f0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#3d9eb3"/>
+                                    </svg>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:1rem; font-weight:700; color:#000000; margin-bottom:0.5rem;">Control mensual</div>
+                                    <div style="font-size:0.85rem; color:#666666; margin-bottom:0.75rem;">Asistir a 3 controles veterinarios</div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffc107"/>
+                                        </svg>
+                                        <span style="font-size:0.9rem; font-weight:600; color:#000000;">+20 estrellas</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Misión 3: Fotógrafo oficial -->
+                        <div style="background-color:#f5f5f5; border-radius:0.75rem; padding:1.25rem; position:relative;">
+                            <div style="position:absolute; top:1rem; right:1rem; font-size:0.9rem; font-weight:700; color:#666666;">0/10</div>
+                            <div style="display:flex; align-items:flex-start; gap:1rem;">
+                                <div style="width:48px; height:48px; border-radius:50%; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M12 12c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm8-7h-3.17l-1.24-1.35c-.37-.41-.91-.65-1.47-.65H9.88c-.56 0-1.1.24-1.47.65L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-8 13c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" fill="#9e9e9e"/>
+                                    </svg>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:1rem; font-weight:700; color:#000000; margin-bottom:0.5rem;">Fotógrafo oficial</div>
+                                    <div style="font-size:0.85rem; color:#666666; margin-bottom:0.75rem;">Subir 10 fotos a la galería de momentos</div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffc107"/>
+                                        </svg>
+                                        <span style="font-size:0.9rem; font-weight:600; color:#000000;">+10 estrellas</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Misión 4: Registro completo -->
+                        <div style="background-color:#f5f5f5; border-radius:0.75rem; padding:1.25rem; position:relative;">
+                            <div style="position:absolute; top:1rem; right:1rem; font-size:0.9rem; font-weight:700; color:#666666;">0/5</div>
+                            <div style="display:flex; align-items:flex-start; gap:1rem;">
+                                <div style="width:48px; height:48px; border-radius:50%; background-color:#e0e0e0; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z" fill="#9e9e9e"/>
+                                    </svg>
+                                </div>
+                                <div style="flex:1;">
+                                    <div style="font-size:1rem; font-weight:700; color:#000000; margin-bottom:0.5rem;">Registro completo</div>
+                                    <div style="font-size:0.85rem; color:#666666; margin-bottom:0.75rem;">Registrar peso durante 5 meses consecutivos</div>
+                                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffc107"/>
+                                        </svg>
+                                        <span style="font-size:0.9rem; font-weight:600; color:#000000;">+25 estrellas</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logros Desbloqueados -->
+                <div style="margin-bottom:2rem;">
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" stroke="#3d9eb3" stroke-width="1.5" fill="none"/>
+                        </svg>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#000000; margin:0;">Logros Desbloqueados</h3>
+                    </div>
+                    <div style="display:flex; gap:0.75rem; flex-wrap:wrap;">
+                        <div style="background-color:#b3e5f0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.5rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#ffc107"/>
+                            </svg>
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Primer Mes</span>
+                        </div>
+                        <div style="background-color:#b3e5f0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.5rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M9 2v2H7v2H5v2H3v12h18V8h-2V6h-2V4h-2V2H9zm0 2h6v2h2v2h2v2H5v-2h2V6h2V4h2V4H9v2zm-4 6v8h16v-8H5z" fill="#ffffff"/>
+                            </svg>
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Vacunador Pro</span>
+                        </div>
+                        <div style="background-color:#b3e5f0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.5rem;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="#f44336"/>
+                            </svg>
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Tutor Dedicado</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logros por Desbloquear -->
+                <div>
+                    <div style="display:flex; align-items:center; gap:0.75rem; margin-bottom:1.5rem;">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" fill="#9e9e9e"/>
+                        </svg>
+                        <h3 style="font-size:1.1rem; font-weight:700; color:#000000; margin:0;">Logros por Desbloquear</h3>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:0.75rem;">
+                        <div style="background-color:#e0e0e0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Tutor Veterano</span>
+                            <span style="font-size:0.85rem; color:#ffffff; opacity:0.8;">Completa 6 meses en la app</span>
+                        </div>
+                        <div style="background-color:#e0e0e0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Lector Ávido</span>
+                            <span style="font-size:0.85rem; color:#ffffff; opacity:0.8;">Lee 10 artículos del blog</span>
+                        </div>
+                        <div style="background-color:#e0e0e0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Experto en Salud</span>
+                            <span style="font-size:0.85rem; color:#ffffff; opacity:0.8;">Completa todas las misiones</span>
+                        </div>
+                        <div style="background-color:#e0e0e0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Racha de 30 días</span>
+                            <span style="font-size:0.85rem; color:#ffffff; opacity:0.8;">Inicia sesión 30 días seguidos</span>
+                        </div>
+                        <div style="background-color:#e0e0e0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Coleccionista</span>
+                            <span style="font-size:0.85rem; color:#ffffff; opacity:0.8;">Alcanza 500 estrellas</span>
+                        </div>
+                        <div style="background-color:#e0e0e0; border-radius:999px; padding:0.75rem 1.25rem; display:flex; align-items:center; gap:0.75rem;">
+                            <span style="font-size:0.9rem; font-weight:600; color:#ffffff;">Cuidador Excepcional</span>
+                            <span style="font-size:0.85rem; color:#ffffff; opacity:0.8;">No pierdas ninguna vacuna por 1 año</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<!-- Modal de éxito -->
+{% if mostrar_modal %}
+<div id="modal-perfil-actualizado" style="position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:2000; display:flex; align-items:center; justify-content:center; padding:1rem; overflow-y:auto;">
+    <div style="background:#ffffff; border-radius:0.7rem; max-width:400px; width:100%; box-shadow:0 10px 30px rgba(0,0,0,0.3); padding:2.5rem; text-align:center; position:relative;">
+        <!-- Icono de éxito -->
+        <div style="width:80px; height:80px; border-radius:50%; background-color:#e8f5e9; display:flex; align-items:center; justify-content:center; margin:0 auto 1.5rem;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="#4caf50"/>
+            </svg>
+        </div>
+        
+        <!-- Título -->
+        <h2 style="font-size:1.5rem; font-weight:700; color:#000000; margin:0 0 0.75rem;">¡Perfil Actualizado!</h2>
+        
+        <!-- Descripción -->
+        <p style="font-size:0.95rem; color:#666666; margin:0 0 2rem; line-height:1.5;">Tu información personal ha sido guardada exitosamente</p>
+        
+        <!-- Botón -->
+        <a href="{% url 'home' %}" style="display:inline-block; background-color:#3d9eb3; color:#ffffff; border:none; border-radius:0.5rem; padding:0.75rem 2rem; font-weight:600; font-size:0.9rem; text-decoration:none; transition:background-color 0.2s; width:100%;">Volver al home</a>
+    </div>
+</div>
+{% endif %}
+
+<script>
+function handleImageUpload(event) {
+    const file = event.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('profile-image-preview');
+            const container = document.getElementById('profile-image-container');
+            const placeholder = document.getElementById('profile-image-placeholder');
+            
+            // Guardar la imagen en localStorage para que persista después de guardar
+            localStorage.setItem('profile_image_preview', e.target.result);
+            
+            // Guardar la imagen en localStorage para mantenerla visible después de guardar
+            localStorage.setItem('profile_image_preview', e.target.result);
+            
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            container.classList.add('has-image');
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Asegurar que los campos de ciudad tengan el estilo correcto
+    const ciudadSelect = document.getElementById('{{ perfil_form.ciudad.id_for_label }}');
+    if (ciudadSelect) {
+        ciudadSelect.className = 'form-input';
+    }
+    
+    // Manejar el prefijo del teléfono
+    const telefonoInput = document.getElementById('{{ perfil_form.telefono.id_for_label }}');
+    if (telefonoInput) {
+        // Si el valor tiene el prefijo +569, quitarlo
+        if (telefonoInput.value && telefonoInput.value.startsWith('+569')) {
+            telefonoInput.value = telefonoInput.value.substring(4);
+        }
+    }
+    
+    // Configurar el campo de foto para que llame a handleImageUpload
+    const fotoInput = document.getElementById('id_foto_perfil');
+    if (fotoInput) {
+        fotoInput.addEventListener('change', handleImageUpload);
+        fotoInput.style.display = 'none';
+        fotoInput.setAttribute('accept', 'image/*');
+    }
+    
+    // Mostrar la imagen guardada o el preview temporal
+    {% if perfil.foto_perfil %}
+    // Si hay imagen guardada en la BD, mostrarla
+    (function() {
+        const container = document.getElementById('profile-image-container');
+        const preview = document.getElementById('profile-image-preview');
+        const placeholder = document.getElementById('profile-image-placeholder');
+        if (container && preview) {
+            container.classList.add('has-image');
+            preview.style.display = 'block';
+            preview.src = "{{ perfil.foto_perfil.url }}";
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+            // Limpiar el preview temporal ya que tenemos la imagen guardada
+            localStorage.removeItem('profile_image_preview');
+        }
+    })();
+    {% else %}
+    // Si no hay imagen guardada, verificar si hay un preview temporal
+    const savedPreview = localStorage.getItem('profile_image_preview');
+    if (savedPreview) {
+        const container = document.getElementById('profile-image-container');
+        const preview = document.getElementById('profile-image-preview');
+        const placeholder = document.getElementById('profile-image-placeholder');
+        if (container && preview) {
+            container.classList.add('has-image');
+            preview.src = savedPreview;
+            preview.style.display = 'block';
+            if (placeholder) {
+                placeholder.style.display = 'none';
+            }
+        }
+    }
+    {% endif %}
+});
+</script>
+
+    <!-- Footer -->
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <div class="footer-col">
+                <div class="footer-brand-title">mascotia.app</div>
+                <p>Bitácora Digital de Salud Animal para Tutores. Centraliza el historial clínico de tus mascotas.</p>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Enlaces rápidos</div>
+                <ul class="footer-list">
+                    <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                    <li><a href="{% url 'home' %}">Panel</a></li>
+                    <li><a href="#">Sobre Nosotros</a></li>
+                    <li><a href="#">Servicios</a></li>
+                    <li><a href="#">Preguntas Frecuentes</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Soporte</div>
+                <ul class="footer-list">
+                    <li><a href="#">Centro de Ayuda</a></li>
+                    <li><a href="#">Términos y Condiciones</a></li>
+                    <li><a href="#">Política de Privacidad</a></li>
+                    <li><a href="#">Contacto</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <div class="footer-title">Contacto</div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">@</span>
+                    <span>josefa@mascotia.app</span>
+                </div>
+                <div class="footer-contact-item">
+                    <span class="footer-contact-icon">
+                        <svg viewBox="0 0 24 24" fill="white" width="14" height="14" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M12 2C8.13 2 5 5.13 5 9C5 14.25 12 22 12 22C12 22 19 14.25 19 9C19 5.13 15.87 2 12 2ZM12 11.5C10.62 11.5 9.5 10.38 9.5 9C9.5 7.62 10.62 6.5 12 6.5C13.38 6.5 14.5 7.62 14.5 9C14.5 10.38 13.38 11.5 12 11.5Z"/>
+                        </svg>
+                    </span>
+                    <span>Santiago, Chile</span>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-inner">
+                <span>© 2024 Mascotia.app. Todos los derechos reservados.</span>
+                <div class="footer-socials">
+                    <a href="#" class="social-icon">f</a>
+                    <a href="#" class="social-icon instagram">IG</a>
+                    <a href="#" class="social-icon">in</a>
+                    <a href="#" class="social-icon">X</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <style>
+    /* Estilos del Footer */
+    .site-footer {
+        background-color: #f0f9fa;
+        padding: 3rem 2rem 1.5rem;
+        margin-top: 4rem;
+    }
+
+    .footer-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .footer-col {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .footer-brand-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #5bb4c5;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-col p {
+        font-size: 0.9rem;
+        color: #666666;
+        line-height: 1.6;
+    }
+
+    .footer-title {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #000000;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .footer-list li a {
+        color: #666666;
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: color 0.2s;
+    }
+
+    .footer-list li a:hover {
+        color: #5bb4c5;
+    }
+
+    .footer-contact-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.9rem;
+        color: #666666;
+        margin-bottom: 0.5rem;
+    }
+
+    .footer-contact-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .footer-bottom {
+        border-top: 1px solid #e0e0e0;
+        padding-top: 1.5rem;
+    }
+
+    .footer-bottom-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #666666;
+    }
+
+    .footer-socials {
+        display: flex;
+        gap: 0.75rem;
+    }
+
+    .social-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .social-icon.instagram {
+        background-color: #5bb4c5;
+    }
+
+    @media (max-width: 768px) {
+        .footer-inner {
+            grid-template-columns: 1fr;
+        }
+        
+        .footer-bottom-inner {
+            flex-direction: column;
+            text-align: center;
+        }
+    }
+    </style>
+</div>
+{% endblock %}

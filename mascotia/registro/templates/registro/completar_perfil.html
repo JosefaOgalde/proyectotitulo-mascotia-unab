@@ -1,0 +1,887 @@
+{% extends 'registro/base.html' %}
+{% load static %}
+
+{% block title %}Completar Perfil - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        overflow-y: auto;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5 !important;
+        padding-top: 62px;
+    }
+    
+    html {
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5;
+    }
+
+    /* Navbar simple */
+    .profile-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: #f8fbfc;
+        padding: 14px 0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        z-index: 100;
+    }
+
+    .profile-navbar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .profile-navbar-brand {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        color: #00a9b4;
+        text-decoration: none;
+    }
+
+    .profile-container {
+        min-height: calc(100vh - 62px);
+        display: flex;
+        background-color: #f5f5f5;
+        padding-top: 0;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    /* Panel izquierdo con imagen */
+    .profile-left-panel {
+        flex: 1;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-end;
+        padding: 1.5rem 0.5rem 1.5rem 0;
+        position: relative;
+    }
+
+    .profile-image-container {
+        width: 100%;
+        max-width: 420px;
+        height: 100%;
+        min-height: 500px;
+        background-color: #f0f9fa;
+        border: 2px solid #5bb4c5;
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .profile-left-panel img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        width: auto;
+        height: auto;
+        height: auto;
+        border-radius: 1rem;
+    }
+
+    /* Panel derecho con formulario */
+    .profile-right-panel {
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 1.5rem 0 1.5rem 0.5rem;
+        background-color: #f5f5f5;
+    }
+
+    .profile-card {
+        width: 100%;
+        max-width: 420px;
+        height: 100%;
+        min-height: 500px;
+        background-color: #ffffff;
+        border-radius: 1.25rem;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        overflow: visible;
+        position: relative;
+    }
+
+    .back-link {
+        color: #5bb4c5;
+        font-weight: 500;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        margin-bottom: 0.4rem;
+        font-size: 0.75rem;
+        transition: color 0.2s ease;
+    }
+
+    .back-link:hover {
+        color: #4aa3b3;
+    }
+
+    .profile-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.6rem;
+    }
+
+    .profile-logo svg {
+        width: 26px;
+        height: 26px;
+        fill: #ffffff;
+    }
+
+    .profile-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #333333;
+        text-align: left;
+        margin: 0;
+    }
+    
+    .profile-title-header {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .profile-message {
+        font-size: 0.85rem;
+        color: #5bb4c5;
+        text-align: center;
+        margin-bottom: 1rem;
+        font-weight: 500;
+    }
+
+    .profile-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        flex: 1;
+        min-height: 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #333333;
+    }
+
+    .form-group label .required {
+        color: #e74c3c;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.8rem;
+        color: #333333;
+        background-color: #ffffff;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #5bb4c5;
+        box-shadow: 0 0 0 3px rgba(91, 180, 197, 0.1);
+    }
+
+    .form-control:disabled {
+        background-color: #f5f5f5;
+        cursor: not-allowed;
+    }
+
+    .form-control::placeholder {
+        color: #999999;
+    }
+
+    .form-help {
+        font-size: 0.75rem;
+        color: #666666;
+        margin-top: -0.2rem;
+    }
+
+    .form-error {
+        font-size: 0.85rem;
+        color: #e74c3c;
+        margin-top: 0.25rem;
+    }
+
+    .phone-prefix {
+        position: relative;
+    }
+
+    .phone-prefix::before {
+        content: '+569';
+        position: absolute;
+        left: 0.85rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #333333;
+        font-size: 0.85rem;
+        font-weight: 500;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .phone-prefix .form-control {
+        padding-left: 3.5rem;
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 0.6rem 1.25rem;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 0.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .submit-button:hover {
+        background-color: #4aa3b3;
+    }
+
+    .info-box {
+        background-color: #e8f8f9;
+        border: 1px solid #5bb4c5;
+        border-radius: 0.5rem;
+        padding: 0.6rem;
+        margin-bottom: 0.75rem;
+        font-size: 0.75rem;
+        color: #333333;
+    }
+
+    .info-box strong {
+        color: #5bb4c5;
+    }
+
+    .tutor-info-banner {
+        background-color: #e8f8f9;
+        border: 2px solid #5bb4c5;
+        border-radius: 0.75rem;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .tutor-info-banner-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .tutor-info-banner-icon img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+
+    .tutor-info-banner-text {
+        flex: 1;
+    }
+
+    .tutor-info-banner-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #000000;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .tutor-info-banner-subtitle {
+        font-size: 0.8rem;
+        color: #666666;
+        margin: 0;
+    }
+
+    .confidentiality-message {
+        background-color: #fff3cd;
+        border: 1px solid #ffc107;
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin-bottom: 1rem;
+        font-size: 0.85rem;
+        color: #856404;
+        text-align: center;
+        line-height: 1.4;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.75rem;
+        white-space: nowrap;
+    }
+
+    .confidentiality-message strong {
+        color: #856404;
+        font-weight: 600;
+    }
+    
+    .confidentiality-message img {
+        width: 28px;
+        height: 28px;
+        flex-shrink: 0;
+        filter: brightness(0) saturate(100%) invert(52%) sepia(95%) saturate(1352%) hue-rotate(358deg) brightness(96%) contrast(89%);
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+        .profile-container {
+            flex-direction: column;
+            padding-top: 50px;
+        }
+
+        .profile-left-panel {
+            min-height: 200px;
+            padding: 1rem;
+        }
+
+        .profile-right-panel {
+            padding: 0.75rem;
+        }
+
+        .profile-card {
+            max-width: 100%;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .profile-left-panel {
+            min-height: 180px;
+        }
+
+        .profile-card {
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+
+        .profile-title {
+            font-size: 1.2rem;
+        }
+
+        .profile-subtitle {
+            font-size: 0.75rem;
+        }
+
+        .profile-form {
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar simple -->
+<nav class="profile-navbar">
+    <div class="profile-navbar-inner">
+        <a href="{% url 'inicio' %}" class="profile-navbar-brand">mascotia.app</a>
+    </div>
+</nav>
+
+<div class="profile-container">
+    <!-- Panel izquierdo con imagen -->
+    <div class="profile-left-panel">
+            <div class="profile-image-container">
+            <img src="{% static 'registro/images/cuenta-tutor-2.png' %}" alt="Mascotia - Datos del Tutor">
+        </div>
+    </div>
+
+    <!-- Panel derecho con formulario -->
+    <div class="profile-right-panel">
+        <div class="profile-card">
+            <!-- Título -->
+            <div class="profile-title-header">
+                <div style="width:40px; height:40px; border-radius:50%; background-color:#5bb4c5; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                    <img src="{% static 'registro/icons/usuario.svg' %}" alt="Usuario" style="width:24px; height:24px; filter: brightness(0) invert(1);">
+                </div>
+                <h1 class="profile-title">Completar Perfil Tutor</h1>
+            </div>
+
+            <!-- Mensaje de confidencialidad -->
+            <div class="confidentiality-message">
+                <img src="{% static 'registro/icons/protegido.svg' %}" alt="Protegido">
+                <span><strong>Tu información es completamente confidencial</strong></span>
+            </div>
+
+            <!-- Formulario -->
+            <form method="post" class="profile-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <!-- Campo oculto para foto_perfil (no se muestra pero se mantiene para compatibilidad) -->
+                {{ form.foto_perfil }}
+
+                <!-- Campo Teléfono (Primer campo) -->
+                <div class="form-group">
+                    <label for="{{ form.telefono.id_for_label }}">
+                        {{ form.telefono.label }} <span class="required">*</span>
+                    </label>
+                    <div class="phone-prefix">
+                        {{ form.telefono }}
+                    </div>
+                    <p class="form-help">Ingresa solo los 8 dígitos.</p>
+                    {% if form.telefono.errors %}
+                        <div class="form-error">
+                            {% for error in form.telefono.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Ocupación -->
+                <div class="form-group">
+                    <label for="{{ form.ocupacion.id_for_label }}">
+                        {{ form.ocupacion.label }} <span class="required">*</span>
+                    </label>
+                    {{ form.ocupacion }}
+                    {% if form.ocupacion.errors %}
+                        <div class="form-error">
+                            {% for error in form.ocupacion.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Fecha de Nacimiento -->
+                <div class="form-group">
+                    <label for="{{ form.fecha_nacimiento.id_for_label }}">
+                        {{ form.fecha_nacimiento.label }}
+                    </label>
+                    {{ form.fecha_nacimiento }}
+                    {% if form.fecha_nacimiento.errors %}
+                        <div class="form-error">
+                            {% for error in form.fecha_nacimiento.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Sobrenombre -->
+                <div class="form-group">
+                    <label for="{{ form.sobrenombre.id_for_label }}">
+                        {{ form.sobrenombre.label }}
+                    </label>
+                    <input type="text" name="sobrenombre" id="{{ form.sobrenombre.id_for_label }}" class="form-control w-full" placeholder="{% if user_name %}{{ user_name }}, {% endif %}¿Cómo prefieres que te llamemos?" value="{{ form.sobrenombre.value|default:'' }}">
+                    <p class="form-help">Opcional. Si no ingresas nada, usaremos tu nombre.</p>
+                    {% if form.sobrenombre.errors %}
+                        <div class="form-error">
+                            {% for error in form.sobrenombre.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Dirección (Calle y Número unidos) -->
+                <div class="form-group">
+                    <label for="id_direccion_completa">
+                        Dirección <span class="required">*</span>
+                    </label>
+                    <input type="text" name="direccion_completa" id="id_direccion_completa" class="form-control w-full" placeholder="Ej: Av. Libertador Bernardo O'Higgins 123" value="{% if form.calle.value or form.numero.value %}{{ form.calle.value|default:'' }} {{ form.numero.value|default:'' }}{% endif %}" required>
+                    <input type="hidden" name="calle" id="id_calle" value="{{ form.calle.value|default:'' }}">
+                    <input type="hidden" name="numero" id="id_numero" value="{{ form.numero.value|default:'' }}">
+                    {% if form.calle.errors or form.numero.errors %}
+                        <div class="form-error">
+                            {% for error in form.calle.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                            {% for error in form.numero.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Región -->
+                <div class="form-group">
+                    <label for="id_region">
+                        Región <span class="required">*</span>
+                    </label>
+                    <select name="region" id="id_region" class="form-control w-full" required>
+                        <option value="">Selecciona una región</option>
+                    </select>
+                </div>
+
+                <!-- Campos Ciudad y Comuna lado a lado -->
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                <!-- Campo Ciudad -->
+                    <div class="form-group" style="margin-bottom:0;">
+                    <label for="{{ form.ciudad.id_for_label }}">
+                            {{ form.ciudad.label }} <span class="required">*</span>
+                    </label>
+                        <select name="ciudad" id="id_ciudad" class="form-control w-full" disabled required>
+                            <option value="">Selecciona una ciudad</option>
+                        </select>
+                    {% if form.ciudad.errors %}
+                        <div class="form-error">
+                            {% for error in form.ciudad.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Comuna -->
+                    <div class="form-group" style="margin-bottom:0;">
+                    <label for="id_comuna_select">
+                            {{ form.comuna.label }} <span class="required">*</span>
+                    </label>
+                        <select name="comuna_select" id="id_comuna_select" class="form-control w-full" disabled required>
+                            <option value="">Selecciona una comuna</option>
+                    </select>
+                    {{ form.comuna }}
+                    {% if form.comuna.errors %}
+                        <div class="form-error">
+                            {% for error in form.comuna.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    </div>
+                </div>
+
+                <!-- Errores generales del formulario -->
+                {% if form.non_field_errors %}
+                    <div class="form-error">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Botón de envío -->
+                <button type="submit" class="submit-button">Guardar Información</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const regionSelect = document.getElementById('id_region');
+    const ciudadSelect = document.getElementById('id_ciudad');
+    const comunaSelect = document.getElementById('id_comuna_select');
+    const comunaHidden = document.getElementById('id_comuna');
+    
+    // Datos de regiones, ciudades y comunas de Chile (ordenados alfabéticamente)
+    const regionesChile = [
+        'Arica y Parinacota',
+        'Tarapacá',
+        'Antofagasta',
+        'Atacama',
+        'Coquimbo',
+        'Valparaíso',
+        'Metropolitana de Santiago',
+        'O\'Higgins',
+        'Maule',
+        'Ñuble',
+        'Biobío',
+        'La Araucanía',
+        'Los Ríos',
+        'Los Lagos',
+        'Aysén',
+        'Magallanes y la Antártica Chilena'
+    ].sort();
+    
+    // Estructura: región -> ciudades -> comunas
+    const datosChile = {
+        'Arica y Parinacota': {
+            'Arica': ['Arica', 'Camarones'].sort(),
+            'Putre': ['Putre', 'General Lagos'].sort()
+        },
+        'Tarapacá': {
+            'Iquique': ['Iquique', 'Alto Hospicio'].sort(),
+            'Pozo Almonte': ['Pozo Almonte', 'Camiña', 'Colchane', 'Huara', 'Pica'].sort()
+        },
+        'Antofagasta': {
+            'Antofagasta': ['Antofagasta', 'Mejillones', 'Sierra Gorda', 'Taltal'].sort(),
+            'Calama': ['Calama', 'Ollagüe', 'San Pedro de Atacama'].sort(),
+            'Tocopilla': ['Tocopilla', 'María Elena'].sort()
+        },
+        'Atacama': {
+            'Copiapó': ['Copiapó', 'Caldera', 'Tierra Amarilla'].sort(),
+            'Chañaral': ['Chañaral', 'Diego de Almagro'].sort(),
+            'Vallenar': ['Vallenar', 'Alto del Carmen', 'Freirina', 'Huasco'].sort()
+        },
+        'Coquimbo': {
+            'La Serena': ['La Serena', 'Coquimbo', 'Andacollo', 'La Higuera', 'Paihuano', 'Vicuña'].sort(),
+            'Ovalle': ['Ovalle', 'Combarbalá', 'Monte Patria', 'Punitaqui', 'Río Hurtado'].sort(),
+            'Illapel': ['Illapel', 'Canela', 'Los Vilos', 'Salamanca'].sort()
+        },
+        'Valparaíso': {
+            'Valparaíso': ['Valparaíso', 'Casablanca', 'Concón', 'Juan Fernández', 'Puchuncaví', 'Quintero', 'Viña del Mar'].sort(),
+            'Quillota': ['Quillota', 'Calera', 'Hijuelas', 'La Cruz', 'Nogales'].sort(),
+            'San Antonio': ['San Antonio', 'Algarrobo', 'Cartagena', 'El Quisco', 'El Tabo', 'Santo Domingo'].sort(),
+            'San Felipe': ['San Felipe', 'Catemu', 'Llaillay', 'Panquehue', 'Putaendo', 'Santa María'].sort()
+        },
+        'Metropolitana de Santiago': {
+            'Santiago': ['Santiago', 'Cerrillos', 'Cerro Navia', 'Conchalí', 'El Bosque', 'Estación Central', 'Huechuraba', 'Independencia', 'La Cisterna', 'La Florida', 'La Granja', 'La Pintana', 'La Reina', 'Las Condes', 'Lo Barnechea', 'Lo Espejo', 'Lo Prado', 'Macul', 'Maipú', 'Ñuñoa', 'Pedro Aguirre Cerda', 'Peñalolén', 'Providencia', 'Pudahuel', 'Quilicura', 'Quinta Normal', 'Recoleta', 'Renca', 'San Joaquín', 'San Miguel', 'San Ramón', 'Vitacura'].sort(),
+            'Puente Alto': ['Puente Alto', 'Pirque', 'San José de Maipo'].sort(),
+            'San Bernardo': ['San Bernardo', 'Buin', 'Calera de Tango', 'Paine'].sort(),
+            'Melipilla': ['Melipilla', 'Alhué', 'Curacaví', 'María Pinto', 'San Pedro'].sort(),
+            'Talagante': ['Talagante', 'El Monte', 'Isla de Maipo', 'Padre Hurtado', 'Peñaflor'].sort()
+        },
+        'O\'Higgins': {
+            'Rancagua': ['Rancagua', 'Codegua', 'Coinco', 'Coltauco', 'Doñihue', 'Graneros', 'Las Cabras', 'Machalí', 'Malloa', 'Mostazal', 'Olivar', 'Peumo', 'Pichidegua', 'Quinta de Tilcoco', 'Rengo', 'Requínoa', 'San Vicente'].sort(),
+            'San Fernando': ['San Fernando', 'Chépica', 'Chimbarongo', 'Lolol', 'Nancagua', 'Palmilla', 'Peralillo', 'Placilla', 'Pumanque', 'Santa Cruz'].sort(),
+            'Pichilemu': ['Pichilemu', 'La Estrella', 'Litueche', 'Marchihue', 'Navidad', 'Paredones'].sort()
+        },
+        'Maule': {
+            'Talca': ['Talca', 'Constitución', 'Curepto', 'Empedrado', 'Maule', 'Pelarco', 'Pencahue', 'Río Claro', 'San Clemente', 'San Rafael'].sort(),
+            'Curicó': ['Curicó', 'Hualañé', 'Licantén', 'Molina', 'Rauco', 'Romeral', 'Sagrada Familia', 'Teno', 'Vichuquén'].sort(),
+            'Linares': ['Linares', 'Colbún', 'Longaví', 'Parral', 'Retiro', 'San Javier', 'Villa Alegre', 'Yerbas Buenas'].sort(),
+            'Cauquenes': ['Cauquenes', 'Chanco', 'Pelluhue'].sort()
+        },
+        'Ñuble': {
+            'Chillán': ['Chillán', 'Bulnes', 'Chillán Viejo', 'El Carmen', 'Pemuco', 'Pinto', 'Quillón', 'San Ignacio', 'Yungay'].sort(),
+            'San Carlos': ['San Carlos', 'Coihueco', 'Ñiquén', 'San Fabián', 'San Nicolás'].sort(),
+            'Quirihue': ['Quirihue', 'Cobquecura', 'Coelemu', 'Ninhue', 'Portezuelo', 'Ránquil', 'Treguaco'].sort()
+        },
+        'Biobío': {
+            'Concepción': ['Concepción', 'Coronel', 'Chiguayante', 'Florida', 'Hualpén', 'Hualqui', 'Lota', 'Penco', 'San Pedro de la Paz', 'Santa Juana', 'Talcahuano', 'Tomé'].sort(),
+            'Los Ángeles': ['Los Ángeles', 'Antuco', 'Cabrero', 'Laja', 'Mulchén', 'Nacimiento', 'Negrete', 'Quilaco', 'Quilleco', 'San Rosendo', 'Santa Bárbara', 'Tucapel', 'Yumbel'].sort(),
+            'Lebu': ['Lebu', 'Arauco', 'Cañete', 'Contulmo', 'Curanilahue', 'Los Álamos', 'Tirúa'].sort(),
+            'Chillán': ['Chillán', 'Bulnes', 'Chillán Viejo', 'El Carmen', 'Pemuco', 'Pinto', 'Quillón', 'San Ignacio', 'Yungay'].sort()
+        },
+        'La Araucanía': {
+            'Temuco': ['Temuco', 'Carahue', 'Cholchol', 'Cunco', 'Curarrehue', 'Freire', 'Galvarino', 'Gorbea', 'Lautaro', 'Loncoche', 'Melipeuco', 'Nueva Imperial', 'Padre Las Casas', 'Perquenco', 'Pitrufquén', 'Pucón', 'Saavedra', 'Teodoro Schmidt', 'Toltén', 'Vilcún', 'Villarrica'].sort(),
+            'Angol': ['Angol', 'Collipulli', 'Curacautín', 'Ercilla', 'Lonquimay', 'Los Sauces', 'Lumaco', 'Purén', 'Renaico', 'Traiguén', 'Victoria'].sort(),
+            'Villarrica': ['Villarrica', 'Pucón', 'Curarrehue'].sort()
+        },
+        'Los Ríos': {
+            'Valdivia': ['Valdivia', 'Corral', 'Lanco', 'Los Lagos', 'Máfil', 'Mariquina', 'Paillaco', 'Panguipulli'].sort(),
+            'La Unión': ['La Unión', 'Futrono', 'Lago Ranco', 'Río Bueno'].sort()
+        },
+        'Los Lagos': {
+            'Osorno': ['Osorno', 'Puerto Octay', 'Purranque', 'Puyehue', 'Río Negro', 'San Juan de la Costa', 'San Pablo'].sort(),
+            'Puerto Montt': ['Puerto Montt', 'Calbuco', 'Cochamó', 'Fresia', 'Frutillar', 'Los Muermos', 'Llanquihue', 'Maullín', 'Puerto Varas'].sort(),
+            'Castro': ['Castro', 'Ancud', 'Chonchi', 'Curaco de Vélez', 'Dalcahue', 'Puqueldón', 'Queilén', 'Quemchi', 'Quellón', 'Quinchao'].sort(),
+            'Puerto Aysén': ['Puerto Aysén', 'Cisnes', 'Guaitecas'].sort()
+        },
+        'Aysén': {
+            'Coyhaique': ['Coyhaique', 'Lago Verde'].sort(),
+            'Aysén': ['Aysén', 'Cisnes', 'Guaitecas'].sort(),
+            'Chile Chico': ['Chile Chico', 'Río Ibáñez'].sort(),
+            'Cochrane': ['Cochrane', 'O\'Higgins', 'Tortel'].sort()
+        },
+        'Magallanes y la Antártica Chilena': {
+            'Punta Arenas': ['Punta Arenas', 'Laguna Blanca', 'Río Verde', 'San Gregorio'].sort(),
+            'Puerto Natales': ['Puerto Natales', 'Torres del Paine'].sort(),
+            'Porvenir': ['Porvenir', 'Primavera', 'Timaukel'].sort()
+        }
+    };
+    
+    // Función para ordenar ciudades dentro de cada región
+    function ordenarCiudadesPorRegion(region) {
+        const ciudades = Object.keys(datosChile[region] || {}).sort();
+        return ciudades;
+    }
+    
+    // Función para actualizar ciudades según región seleccionada
+    function actualizarCiudades() {
+        const regionSeleccionada = regionSelect.value;
+        
+        // Limpiar opciones actuales
+        ciudadSelect.innerHTML = '';
+        comunaSelect.innerHTML = '';
+        
+        if (regionSeleccionada && datosChile[regionSeleccionada]) {
+            // Habilitar el campo ciudad
+            ciudadSelect.disabled = false;
+            
+            // Agregar opciones de ciudades ordenadas alfabéticamente
+            const ciudades = ordenarCiudadesPorRegion(regionSeleccionada);
+            ciudades.forEach(function(ciudad) {
+                const option = document.createElement('option');
+                option.value = ciudad;
+                option.textContent = ciudad;
+                ciudadSelect.appendChild(option);
+            });
+        } else {
+            // Deshabilitar y resetear los campos
+            ciudadSelect.disabled = true;
+            comunaSelect.disabled = true;
+            const optionCiudad = document.createElement('option');
+            optionCiudad.value = '';
+            optionCiudad.textContent = 'Selecciona una ciudad';
+            ciudadSelect.appendChild(optionCiudad);
+            
+            const optionComuna = document.createElement('option');
+            optionComuna.value = '';
+            optionComuna.textContent = 'Selecciona una comuna';
+            comunaSelect.appendChild(optionComuna);
+        }
+        
+        // Limpiar comuna hidden
+        if (comunaHidden) {
+            comunaHidden.value = '';
+        }
+    }
+    
+    // Función para actualizar comunas según ciudad seleccionada
+    function actualizarComunas() {
+        const regionSeleccionada = regionSelect.value;
+        const ciudadSeleccionada = ciudadSelect.value;
+        
+        // Limpiar opciones actuales
+        comunaSelect.innerHTML = '';
+        
+        if (regionSeleccionada && ciudadSeleccionada && datosChile[regionSeleccionada] && datosChile[regionSeleccionada][ciudadSeleccionada]) {
+            // Habilitar el campo comuna
+            comunaSelect.disabled = false;
+            
+            // Agregar opciones de comunas ordenadas alfabéticamente
+            const comunas = datosChile[regionSeleccionada][ciudadSeleccionada].sort();
+            comunas.forEach(function(comuna) {
+                const option = document.createElement('option');
+                option.value = comuna;
+                option.textContent = comuna;
+                comunaSelect.appendChild(option);
+            });
+        } else {
+            // Deshabilitar y resetear el campo comuna
+            comunaSelect.disabled = true;
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Selecciona una comuna';
+            comunaSelect.appendChild(option);
+        }
+        
+        // Limpiar comuna hidden
+            if (comunaHidden) {
+                comunaHidden.value = '';
+            }
+        }
+    
+    // Inicializar regiones
+    regionesChile.forEach(function(region) {
+        const option = document.createElement('option');
+        option.value = region;
+        option.textContent = region;
+        regionSelect.appendChild(option);
+    });
+    
+    // Event listeners
+    if (regionSelect) {
+        regionSelect.addEventListener('change', function() {
+            actualizarCiudades();
+        });
+    }
+    
+    if (ciudadSelect) {
+        ciudadSelect.addEventListener('change', function() {
+            actualizarComunas();
+        });
+    }
+    
+    // Sincronizar el select visible con el campo hidden cuando cambie
+    if (comunaSelect && comunaHidden) {
+        comunaSelect.addEventListener('change', function() {
+            comunaHidden.value = comunaSelect.value;
+        });
+    }
+
+    // Inicializar si hay valores pre-seleccionados
+    if (regionSelect.value) {
+        actualizarCiudades();
+        if (ciudadSelect.value) {
+            actualizarComunas();
+            if (comunaSelect.value && comunaHidden) {
+                comunaHidden.value = comunaSelect.value;
+            }
+        }
+    }
+    
+    // Manejar el campo de dirección completa
+    const direccionCompletaInput = document.getElementById('id_direccion_completa');
+    const calleHidden = document.getElementById('id_calle');
+    const numeroHidden = document.getElementById('id_numero');
+    
+    if (direccionCompletaInput && calleHidden && numeroHidden) {
+        // Al enviar el formulario, dividir la dirección en calle y número
+        const form = direccionCompletaInput.closest('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                const direccionCompleta = direccionCompletaInput.value.trim();
+                if (direccionCompleta) {
+                    // Intentar dividir la dirección (asumiendo que el número está al final)
+                    const partes = direccionCompleta.split(/\s+/);
+                    if (partes.length > 1) {
+                        // El último elemento podría ser el número
+                        const posibleNumero = partes[partes.length - 1];
+                        // Si el último elemento es numérico o contiene números, es el número
+                        if (/^\d+/.test(posibleNumero)) {
+                            numeroHidden.value = posibleNumero;
+                            calleHidden.value = partes.slice(0, -1).join(' ');
+                        } else {
+                            // Si no, toda la dirección va en calle
+                            calleHidden.value = direccionCompleta;
+                            numeroHidden.value = '';
+                        }
+        } else {
+                        // Solo hay una parte, va en calle
+                        calleHidden.value = direccionCompleta;
+                        numeroHidden.value = '';
+                    }
+                }
+            });
+        }
+    }
+});
+</script>
+
+{% endblock %}

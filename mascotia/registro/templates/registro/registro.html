@@ -1,0 +1,521 @@
+{% extends 'registro/base.html' %}
+{% load static %}
+
+{% block title %}Crear Cuenta - Mascotia.app{% endblock %}
+
+{% block extra_css %}
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Poppins', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f5f5f5 !important;
+        padding-top: 62px;
+    }
+
+    /* Navbar para usuarios no autenticados */
+    .register-navbar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background-color: #f8fbfc;
+        padding: 14px 0;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        z-index: 100;
+    }
+
+    .register-navbar-inner {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .register-navbar-logo {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: 0.03em;
+        color: #00a9b4;
+        text-decoration: none;
+    }
+
+    .register-navbar-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .register-navbar-btn {
+        background-color: #e0e0e0;
+        color: #333333;
+        border: none;
+        border-radius: 0.35rem;
+        font-weight: 600;
+        padding: 0.4rem 0.85rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.75rem;
+        cursor: pointer;
+        font-family: inherit;
+        transition: background-color 0.2s;
+    }
+
+    .register-navbar-btn:hover {
+        background-color: #d0d0d0;
+    }
+
+    .register-navbar-btn-primary {
+        background-color: #3d9eb3;
+        color: #ffffff;
+    }
+
+    .register-navbar-btn-primary:hover {
+        background-color: #2d8ba0;
+    }
+
+    .register-container {
+        min-height: calc(100vh - 62px);
+        display: flex;
+        background-color: #f5f5f5;
+        padding-top: 0;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 24px;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    /* Panel izquierdo con imagen */
+    .register-left-panel {
+        flex: 1;
+        background-color: #f5f5f5;
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-end;
+        padding: 1.5rem 0.5rem 1.5rem 0;
+        position: relative;
+    }
+
+    .register-image-container {
+        width: 100%;
+        max-width: 420px;
+        height: 100%;
+        min-height: 500px;
+        background-color: #f0f9fa;
+        border: 2px solid #5bb4c5;
+        border-radius: 1.25rem;
+        padding: 1.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+    .register-left-panel img {
+        max-width: 100%;
+        max-height: 100%;
+        object-fit: contain;
+        width: auto;
+        height: auto;
+        border-radius: 1rem;
+    }
+
+    /* Panel derecho con formulario */
+    .register-right-panel {
+        flex: 1;
+        display: flex;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 1.5rem 0 1.5rem 0.5rem;
+        background-color: #f5f5f5;
+    }
+
+    .register-card {
+        width: 100%;
+        max-width: 420px;
+        height: 100%;
+        min-height: 500px;
+        background-color: #ffffff;
+        border-radius: 1.25rem;
+        padding: 1rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        display: flex;
+        flex-direction: column;
+        position: relative;
+    }
+
+    .register-logo {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 0.6rem;
+    }
+
+    .register-logo svg {
+        width: 26px;
+        height: 26px;
+        fill: #ffffff;
+    }
+
+    .register-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #333333;
+        text-align: center;
+        margin-bottom: 0.15rem;
+    }
+
+    .register-subtitle {
+        font-size: 0.8rem;
+        color: #666666;
+        text-align: center;
+        margin-bottom: 0.85rem;
+    }
+
+    .tutor-info-banner {
+        background-color: #e8f8f9;
+        border: 2px solid #5bb4c5;
+        border-radius: 0.75rem;
+        padding: 1rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .tutor-info-banner-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: #5bb4c5;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .tutor-info-banner-icon img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+
+    .tutor-info-banner-text {
+        flex: 1;
+    }
+
+    .tutor-info-banner-title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #000000;
+        margin: 0 0 0.25rem 0;
+    }
+
+    .tutor-info-banner-subtitle {
+        font-size: 0.8rem;
+        color: #666666;
+        margin: 0;
+    }
+
+    .register-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        flex: 1;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .form-group label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #333333;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 0.6rem 0.85rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.5rem;
+        font-size: 0.85rem;
+        color: #333333;
+        background-color: #ffffff;
+        transition: border-color 0.2s ease;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: #5bb4c5;
+        box-shadow: 0 0 0 3px rgba(91, 180, 197, 0.1);
+    }
+
+    .form-control::placeholder {
+        color: #999999;
+    }
+
+    .form-error {
+        font-size: 0.85rem;
+        color: #e74c3c;
+        margin-top: 0.25rem;
+        animation: fadeIn 0.3s ease-in;
+    }
+
+    .form-error p {
+        margin: 0;
+        padding: 0;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-5px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .submit-button {
+        width: 100%;
+        padding: 0.7rem 1.5rem;
+        background-color: #5bb4c5;
+        color: #ffffff;
+        border: none;
+        border-radius: 0.75rem;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        margin-top: 0.2rem;
+    }
+
+    .submit-button:hover {
+        background-color: #4aa3b3;
+    }
+
+    .login-link {
+        text-align: center;
+        margin-top: 0.6rem;
+        font-size: 0.8rem;
+        color: #666666;
+    }
+
+    .login-link a {
+        color: #5bb4c5;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .login-link a:hover {
+        text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 968px) {
+        .register-container {
+            flex-direction: column;
+            padding-top: 60px;
+        }
+
+        .register-left-panel {
+            min-height: 200px;
+            padding: 1rem;
+        }
+
+        .register-right-panel {
+            padding: 0.75rem;
+            overflow-y: auto;
+        }
+
+        .register-card {
+            padding: 1.25rem;
+            max-height: calc(100vh - 260px);
+        }
+    }
+
+    @media (max-width: 640px) {
+        .register-left-panel {
+            min-height: 180px;
+        }
+
+        .register-card {
+            padding: 1rem;
+            border-radius: 1rem;
+        }
+
+        .register-title {
+            font-size: 1.35rem;
+        }
+
+        .register-subtitle {
+            font-size: 0.8rem;
+        }
+
+        .register-form {
+            gap: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Navbar para usuarios no autenticados -->
+<nav class="register-navbar">
+    <div class="register-navbar-inner">
+        <a href="{% url 'inicio' %}" class="register-navbar-logo">mascotia.app</a>
+    </div>
+</nav>
+
+<div class="register-container">
+    <!-- Panel izquierdo con imagen -->
+    <div class="register-left-panel">
+        <div class="register-image-container">
+            <img src="{% static 'registro/images/cuenta-tutor.jpeg' %}" alt="Mascotia - Datos del Tutor">
+        </div>
+    </div>
+
+    <!-- Panel derecho con formulario -->
+    <div class="register-right-panel">
+        <div class="register-card">
+            <!-- Título -->
+            <h1 class="register-title">Crear Cuenta</h1>
+
+            <!-- Banner de información del Tutor -->
+            <div class="tutor-info-banner">
+                <div class="tutor-info-banner-icon">
+                    <img src="{% static 'registro/icons/usuario.svg' %}" alt="Usuario" style="filter: brightness(0) invert(1);">
+                </div>
+                <div class="tutor-info-banner-text">
+                    <h2 class="tutor-info-banner-title">Datos del Tutor</h2>
+                    <p class="tutor-info-banner-subtitle">Completa tu información personal para crear tu cuenta</p>
+                </div>
+            </div>
+
+            <!-- Formulario -->
+            <form method="post" class="register-form">
+                {% csrf_token %}
+
+                <!-- Campo Nombre -->
+                <div class="form-group">
+                    <label for="{{ form.first_name.id_for_label }}">{{ form.first_name.label }}</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                        <div class="form-error">
+                            {% for error in form.first_name.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Apellido -->
+                <div class="form-group">
+                    <label for="{{ form.last_name.id_for_label }}">{{ form.last_name.label }}</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                        <div class="form-error">
+                            {% for error in form.last_name.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Email -->
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                        <div class="form-error">
+                            {% for error in form.email.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Contraseña -->
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+                    {{ form.password1 }}
+                    {% if form.password1.errors %}
+                        <div class="form-error">
+                            {% for error in form.password1.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Campo Confirmar Contraseña -->
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+                    {{ form.password2 }}
+                    {% if form.password2.errors %}
+                        <div class="form-error">
+                            {% for error in form.password2.errors %}
+                                <p>{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Errores generales del formulario -->
+                {% if form.non_field_errors %}
+                    <div class="form-error">
+                        {% for error in form.non_field_errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                <!-- Botón de envío -->
+                <button type="submit" class="submit-button">Crear Cuenta</button>
+            </form>
+
+            <!-- Link a login -->
+            <div class="login-link">
+                <span>¿Ya tienes cuenta? </span>
+                <a href="{% url 'login' %}">Inicia sesión aquí</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Hacer que los mensajes de error desaparezcan después de 7 segundos
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorMessages = document.querySelectorAll('.form-error');
+        errorMessages.forEach(function(error) {
+            setTimeout(function() {
+                error.style.transition = 'opacity 0.5s ease-out';
+                error.style.opacity = '0';
+                setTimeout(function() {
+                    error.style.display = 'none';
+                }, 500);
+            }, 7000); // 7 segundos para leer el error
+        });
+    });
+</script>
+{% endblock %}
