@@ -67,7 +67,9 @@ COMANDOS_CMD.txt
 interface/
 
 # Archivos de configuración local
+**/settings/local.py
 mascotia/settings/local.py
+usuario/settings/local.py
 
 # Archivos temporales
 *.tmp
